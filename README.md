@@ -6,7 +6,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
 ## POST /jupiterSwap
 - Description: Perform a token swap.
 - Body Parameters:
-  - privateKey: User's private key.
+  - privateKey(string): User's private key.
   - inputMint(string): The address of the input token.
   - outputMint(string): The address of the output token.
   - makingAmount(string ex "1000"): The amount of input token.
@@ -20,7 +20,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
 ***chưa test được***
 - Description: Set up a limit order for token swaps.
 - Body Parameters:
-  - privateKey: User's private key.
+  - privateKey(string): User's private key.
   - inputMint(string): The address of the input token.
   - outputMint(string): The address of the output token.
   - inputAmount(string): The address of the output token.
