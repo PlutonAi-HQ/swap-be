@@ -14,7 +14,8 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
 - Response: Returns the swap result.
   - Successfull: {status: true, data: ```transaction_id``` } 
   - Fail: {status: false, data: ```error_message``` } - when the input is wrong or can not submit tx to blockchain (Congestion)
- 
+ ![image](https://github.com/user-attachments/assets/d02620f2-9771-4908-b3b7-ab1e767aae91)
+
 ## POST /jupiterLimitOrder 
 ***chưa test được***
 - Description: Set up a limit order for token swaps.
