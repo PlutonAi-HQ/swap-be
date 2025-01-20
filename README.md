@@ -27,7 +27,8 @@
   - Successfull: {status: true, data: ```transaction_id``` } 
   - Fail: {status: false, data: ```error_message``` } - when the input is wrong or can not submit tx to blockchain (Congestion)
 
-## Project Structure
-```src/ultils/init.ts``` : Init the wallet and keypair by giving private key
-```src/jupiter.ts``` : Jupiter Swap implementation
-```src/type.ts``` : Types
+## 📂 Project Structure
+- ```src/ultils/init.ts``` : Init the wallet and keypair by giving private key
+- ```src/jupiter.ts``` : Jupiter Swap implementation
+- ```src/type.ts``` : Types
+- ```src/index.ts``` 
