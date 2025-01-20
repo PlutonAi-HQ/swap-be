@@ -1,6 +1,6 @@
 # 🚀Swap API
 
-This project using [Jupiter Station](https://station.jup.ag/docs/) to implement token swapping
+This project using [Jupiter Station](https://station.jup.ag/docs/) to implement Solana network token swapping 
 
 
 ## POST /jupiterSwap
