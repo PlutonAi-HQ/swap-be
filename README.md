@@ -3,7 +3,8 @@
 This project using [Jupiter Station](https://station.jup.ag/docs/) to implement Solana network token swapping 
 
 
-## GET /jupiterSwap
+
+## POST /jupiterSwap
 - Description: Perform a token swap.
 - Body Parameters:
   - privateKey(string): User's private key.
@@ -12,14 +13,16 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   - inputAmount(number): The address of the output token.
 - Ex: swap 2USDC -> SOL
     
-  ![image](https://github.com/user-attachments/assets/e513941a-90c3-4b41-b428-9ba5fd5061e6)
+  
 
 - Response: Returns the swap result.
-  - Successfull: {status: true, data: ```transaction_id``` } 
-  - Fail: {status: false, data: ```error_message``` } - when the input is wrong or can not submit tx to blockchain (Congestion)
- ![image](https://github.com/user-attachments/assets/d02620f2-9771-4908-b3b7-ab1e767aae91)
+  - Response structure: {code: number, status: boolean, data: string}
+  - Successfull: {code: 200, status: true, data: ```transaction_id``` } 
+  - Fail: {code: , status: false, data: ```error_message``` } - when the input is wrong or can not submit tx to blockchain (Congestion)
+  - ⚠️ Code 500: Submit transaction timeout, neet to retry. 
 
-## GET /jupiterLimitOrder  value transfer must > $5
+
+## POST /jupiterLimitOrder  value transfer must > $5
 - Description: Set up a limit order for token swaps.
 - Body Parameters:
   - privateKey(string): User's private key.
@@ -29,12 +32,11 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   - takingAmount(number): The amount of the output token.
 - Ex: create limit order for swap 0.025SOL -> 5.25USDC
   
-  ![image](https://github.com/user-attachments/assets/56dea66d-90af-4ddf-8bd4-37c7a7abef9f)
 
-  
 - Response: Returns the limit order details.
-  - Successfull: {status: true, data: ```transaction_id``` } 
-  - Fail: {status: false, data: ```error_message``` } - when the input is wrong or can not submit tx to blockchain (Congestion)
+  - Successfull: {code: 200, status: true, data: ```transaction_id``` } 
+  - Fail: {code: , status: false, data: ```error_message``` }
+
 
 ## 📂 Project Structure
 - ```src/ultils/init.ts``` : Init the wallet and keypair by giving private key
