@@ -31,6 +31,7 @@
     "tsx": "^4.19.2"
   },
   "scripts": {
+    "build": "tsc",
     "dev": "nodemon src/index.ts",
     "prod": "ts-node src/index.ts"
   }
