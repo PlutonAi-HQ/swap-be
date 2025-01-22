@@ -30,8 +30,39 @@ type CreateOrderResponse = {
 };
 
 interface Response {
+  code: number;
   status: boolean;
   data: string;
+}
+
+export async function getBalance(
+  publicKey: PublicKey,
+  tikenAddress: PublicKey
+): Promise<number> {
+  try {
+    // Get all token accounts owned by the wallet for the specific mint address
+    const tokenAccounts = await connection.getTokenAccountsByOwner(publicKey, {
+      mint: tikenAddress,
+    });
+
+    if (tokenAccounts.value.length === 0) {
+      return 0;
+    }
+
+    // Loop through the accounts and fetch their balances
+    for (const account of tokenAccounts.value) {
+      const tokenAccountAddress = account.pubkey;
+      const balance = await connection.getTokenAccountBalance(
+        tokenAccountAddress
+      );
+
+      return parseInt(balance.value.amount) || 0;
+    }
+    return 0;
+  } catch (error) {
+    console.error("Error fetching token accounts:", error);
+    return 0;
+  }
 }
 
 export async function jupiterTrade(
@@ -43,6 +74,17 @@ export async function jupiterTrade(
   wallet: Wallet, // user wallet
   keypair: Keypair // user public key
 ): Promise<Response> {
+  const inputMintOwn =
+    inputMint.toBase58() == ""
+      ? await getSolBalance(wallet.publicKey)
+      : await getBalance(wallet.publicKey, inputMint);
+  if (inputMintOwn && inputMintOwn < inputAmount) {
+    return {
+      code: 401,
+      status: false,
+      data: `Token ${inputMint.toBase58()} do not enough balance`,
+    };
+  }
   try {
     // Convert input amount to correct decimals
     const inputDecimals = (await getMint(connection, inputMint)).decimals;
@@ -100,15 +142,30 @@ export async function jupiterTrade(
     });
 
     // Wait for transaction to be confirmed (submit to blockchain)
-    await connection.confirmTransaction({
-      blockhash: latestBlockHash.blockhash,
-      lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
-      signature: txid,
-    });
+    try {
+      await connection.confirmTransaction({
+        blockhash: latestBlockHash.blockhash,
+        lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+        signature: txid,
+      });
+    } catch (e) {
+      return { code: 500, status: false, data: "Transaction submit timeout" };
+    }
     // const signature = await connection.sendTransaction(transaction);
-    return { status: true, data: txid };
+    return { code: 200, status: true, data: txid };
   } catch (error: any) {
-    return { status: false, data: error.message };
+    return { code: 401, status: false, data: error.message };
+  }
+}
+
+async function getSolBalance(publicKey: PublicKey) {
+  try {
+    // Get the balance (in lamports)
+    const balance = await connection.getBalance(publicKey);
+
+    return balance;
+  } catch (error) {
+    return 0;
   }
 }
 
@@ -120,61 +177,88 @@ export async function jupiterLimitOrder(
   outputMint: PublicKey, // output token mint address
   wallet: Wallet // user wallet
 ) {
-  // const inputDecimals = (await getMint(connection, inputMint)).decimals;
-  // const outputDecimals = (await getMint(connection, outputMint)).decimals;
+  const inputMintOwn =
+    inputMint.toBase58() == ""
+      ? await getSolBalance(wallet.publicKey)
+      : await getBalance(wallet.publicKey, inputMint);
+  const outputMintOwn =
+    outputMint.toBase58() == ""
+      ? await getSolBalance(wallet.publicKey)
+      : await getBalance(wallet.publicKey, outputMint);
 
-  // Calculate the correct amount based on actual decimals
-  // const inputScaleAmount = makingAmount * Math.pow(10, inputDecimals);
-  // const outputScaleAmount = takingAmount * Math.pow(10, outputDecimals);
-  const createOrderBody: CreateOrder = {
-    inputMint: inputMint.toString(),
-    outputMint: outputMint.toString(),
-    maker: wallet.publicKey.toBase58(),
-    payer: wallet.publicKey.toBase58(),
-    params: {
-      makingAmount: `${makingAmount}`,
-      takingAmount: `${takingAmount}`,
-    },
+  console.log("inputMintOwn", inputMintOwn);
+  console.log("outputMintOwn", outputMintOwn);
 
-    // "auto" sets the priority fee based on network congestion
-    // and it will be capped at 500,000
-    computeUnitPrice: "auto",
-  };
-  console.log("body", createOrderBody);
+  if (inputMintOwn && inputMintOwn < makingAmount) {
+    return {
+      data: `Token ${inputMint.toBase58()} do not enough balance`,
+      status: false,
+    };
+  } else if (outputMintOwn && outputMintOwn < takingAmount) {
+    return {
+      data: `Token ${outputMint.toBase58()} do not enough balance`,
+      status: false,
+    };
+  } else {
+    // const inputDecimals = (await getMint(connection, inputMint)).decimals;
+    // const outputDecimals = (await getMint(connection, outputMint)).decimals;
 
-  //Send request to API server
+    // Calculate the correct amount based on actual decimals
+    // const inputScaleAmount = makingAmount * Math.pow(10, inputDecimals);
+    // const outputScaleAmount = takingAmount * Math.pow(10, outputDecimals);
+    const createOrderBody: CreateOrder = {
+      inputMint: inputMint.toString(),
+      outputMint: outputMint.toString(),
+      maker: wallet.publicKey.toBase58(),
+      payer: wallet.publicKey.toBase58(),
+      params: {
+        makingAmount: `${makingAmount}`,
+        takingAmount: `${takingAmount}`,
+      },
 
-  const fetchOpts = {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(createOrderBody),
-  };
+      // "auto" sets the priority fee based on network congestion
+      // and it will be capped at 500,000
+      computeUnitPrice: "auto",
+    };
 
-  const response = await fetch(
-    "https://api.jup.ag/limit/v2/createOrder",
-    fetchOpts
-  );
+    //Send request to API server
 
-  //   Sign and submit the transaction on chain
+    const fetchOpts = {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(createOrderBody),
+    };
 
-  // Deserialise base64 tx response
-  const { order, tx } = await response.json();
-  const txBuff = Buffer.from(tx, "base64");
-  const vtx = VersionedTransaction.deserialize(txBuff);
+    try {
+      const response = await fetch(
+        "https://api.jup.ag/limit/v2/createOrder",
+        fetchOpts
+      );
 
-  // Sign with wallet
-  try {
-    vtx.sign([wallet.payer]);
-    const rpcSendOpts: SendOptions = { skipPreflight: true };
-    const hash = await connection.sendRawTransaction(
-      vtx.serialize(),
-      rpcSendOpts
-    );
-    return { data: hash, status: true };
-  } catch (e: any) {
-    return { data: e.message, status: false };
+      //   Sign and submit the transaction on chain
+
+      // Deserialise base64 tx response
+      const { order, tx } = await response.json();
+      const txBuff = Buffer.from(tx, "base64");
+      const vtx = VersionedTransaction.deserialize(txBuff);
+
+      // Sign with wallet
+      try {
+        vtx.sign([wallet.payer]);
+        const rpcSendOpts: SendOptions = { skipPreflight: true };
+        const hash = await connection.sendRawTransaction(
+          vtx.serialize(),
+          rpcSendOpts
+        );
+        return { code: 200, data: hash, status: true };
+      } catch (e: any) {
+        return { code: 401, data: e.message, status: false };
+      }
+    } catch (error: any) {
+      return { code: 401, status: false, data: "Fail to init transaction" };
+    }
   }
 }

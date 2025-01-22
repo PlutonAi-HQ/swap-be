@@ -3,9 +3,14 @@ import express from "express";
 import dotenv from "dotenv";
 import { PublicKey } from "@solana/web3.js";
 import { init } from "./util/init.js";
-import { jupiterLimitOrder, jupiterTrade } from "./util/jupiter.js";
+import { getBalance, jupiterLimitOrder, jupiterTrade } from "./util/jupiter.js";
 import type { ILimitOrder, ISwapReqest } from "./type.js";
-
+import { connection } from "./util/init.js";
+import {
+  TOKEN_PROGRAM_ID,
+  getAccount,
+  getAssociatedTokenAddress,
+} from "@solana/spl-token";
 //init keypair
 
 dotenv.config();
@@ -20,6 +25,17 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.get("/", async (_req, res) => {
   res.send(`Expressjs is running!`);
+});
+
+app.post("/balance", async (_req, res) => {
+  const { wallet } = init(
+    "2E5DFNv7z94isfUBUzfNJyLMM6MEXy5s6dtFnAkZQVsVNfdv23Etib8NXDVQy8qq8eCPHEcXHA9NoikdgaokFEd4"
+  );
+  const balance = await getBalance(
+    wallet.publicKey,
+    new PublicKey(_req.body.outputMint)
+  );
+  res.send(`balance ${balance}`);
 });
 
 app.post("/jupiterLimitOrder", async (_req, res) => {
