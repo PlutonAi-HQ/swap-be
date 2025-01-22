@@ -3,7 +3,7 @@
 This project using [Jupiter Station](https://station.jup.ag/docs/) to implement Solana network token swapping 
 
 
-## POST /jupiterSwap
+## GET /jupiterSwap
 - Description: Perform a token swap.
 - Body Parameters:
   - privateKey(string): User's private key.
@@ -19,7 +19,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   - Fail: {status: false, data: ```error_message``` } - when the input is wrong or can not submit tx to blockchain (Congestion)
  ![image](https://github.com/user-attachments/assets/d02620f2-9771-4908-b3b7-ab1e767aae91)
 
-## POST /jupiterLimitOrder  value transfer must > $5
+## GET /jupiterLimitOrder  value transfer must > $5
 - Description: Set up a limit order for token swaps.
 - Body Parameters:
   - privateKey(string): User's private key.
