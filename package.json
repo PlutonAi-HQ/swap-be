@@ -34,7 +34,6 @@
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "prod": "ts-node src/index.ts",
-    "start": "bun run src/index.ts",
-    "build": "tsc"
+    "start": "bun run src/index.ts"
   }
 }
