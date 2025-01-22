@@ -22,7 +22,7 @@ app.get("/", async (_req, res) => {
   res.send(`Expressjs is running!`);
 });
 
-app.use("/jupiterLimitOrder", async (_req, res) => {
+app.post("/jupiterLimitOrder", async (_req, res) => {
   try {
     console.log(_req.body);
     // convert body to ILimitOrder
@@ -43,7 +43,7 @@ app.use("/jupiterLimitOrder", async (_req, res) => {
   }
 });
 
-app.get("/jupiterSwap", async (_req, res) => {
+app.post("/jupiterSwap", async (_req, res) => {
   try {
     // convert body to ISwapReqest
     const body: ISwapReqest = _req.body;
