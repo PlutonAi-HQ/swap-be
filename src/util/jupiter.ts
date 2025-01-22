@@ -56,7 +56,7 @@ export async function jupiterTrade(
         `https://quote-api.jup.ag/v6/quote?` +
           `inputMint=${inputMint.toString()}` +
           `&outputMint=${outputMint.toString()}` +
-          `&amount=${scaledAmount}` +
+          `&amount=${inputAmount}` +
           `&slippageBps=${slippageBps}` +
           `&onlyDirectRoutes=true` +
           `&maxAccounts=20`
@@ -120,20 +120,20 @@ export async function jupiterLimitOrder(
   outputMint: PublicKey, // output token mint address
   wallet: Wallet // user wallet
 ) {
-  const inputDecimals = (await getMint(connection, inputMint)).decimals;
-  const outputDecimals = (await getMint(connection, outputMint)).decimals;
+  // const inputDecimals = (await getMint(connection, inputMint)).decimals;
+  // const outputDecimals = (await getMint(connection, outputMint)).decimals;
 
   // Calculate the correct amount based on actual decimals
-  const inputScaleAmount = makingAmount * Math.pow(10, inputDecimals);
-  const outputScaleAmount = takingAmount * Math.pow(10, outputDecimals);
+  // const inputScaleAmount = makingAmount * Math.pow(10, inputDecimals);
+  // const outputScaleAmount = takingAmount * Math.pow(10, outputDecimals);
   const createOrderBody: CreateOrder = {
     inputMint: inputMint.toString(),
     outputMint: outputMint.toString(),
     maker: wallet.publicKey.toBase58(),
     payer: wallet.publicKey.toBase58(),
     params: {
-      makingAmount: `${inputScaleAmount}`,
-      takingAmount: `${outputScaleAmount}`,
+      makingAmount: `${makingAmount}`,
+      takingAmount: `${takingAmount}`,
     },
 
     // "auto" sets the priority fee based on network congestion
