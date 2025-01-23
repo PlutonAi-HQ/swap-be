@@ -29,6 +29,21 @@ type CreateOrderResponse = {
   tx: string;
 };
 
+type CancelOrders = {
+  maker: string;
+
+  // "auto" sets the priority fee based on network congestion
+  // and it will be capped at 500,000
+  computeUnitPrice: string | "auto";
+
+  // Specific order account public keys to cancel/close
+  orders?: string[] | undefined;
+};
+
+type CancelOrdersResponse = {
+  txs: string[];
+};
+
 interface Response {
   code: number;
   status: boolean;
@@ -194,11 +209,6 @@ export async function jupiterLimitOrder(
       data: `Token ${inputMint.toBase58()} do not enough balance`,
       status: false,
     };
-  } else if (outputMintOwn && outputMintOwn < takingAmount) {
-    return {
-      data: `Token ${outputMint.toBase58()} do not enough balance`,
-      status: false,
-    };
   } else {
     // const inputDecimals = (await getMint(connection, inputMint)).decimals;
     // const outputDecimals = (await getMint(connection, outputMint)).decimals;
@@ -239,8 +249,9 @@ export async function jupiterLimitOrder(
       );
 
       //   Sign and submit the transaction on chain
-
+      console.log(response.status);
       // Deserialise base64 tx response
+      console.log(fetchOpts);
       const { order, tx } = await response.json();
       const txBuff = Buffer.from(tx, "base64");
       const vtx = VersionedTransaction.deserialize(txBuff);
@@ -260,5 +271,61 @@ export async function jupiterLimitOrder(
     } catch (error: any) {
       return { code: 401, status: false, data: "Fail to init transaction" };
     }
+  }
+}
+
+export async function jupiterCancelOrders(wallet: Wallet) {
+  const cancelOrdersBody: CancelOrders = {
+    maker: wallet.publicKey.toBase58(),
+    computeUnitPrice: "auto",
+  };
+
+  const fetchOpts = {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(cancelOrdersBody),
+  };
+
+  try {
+    const response = await fetch(
+      "https://api.jup.ag/limit/v2/cancelOrders",
+      fetchOpts
+    );
+
+    if (response.status == 400) {
+      return { code: 400, data: "No matching orders found", status: false };
+    }
+
+    //   Sign and submit the transaction on chain
+
+    // Deserialise base64 tx response
+    const { txs } = await response.json();
+    console.log(txs[0]);
+
+    const txBuff = Buffer.from(txs[0], "base64");
+    console.log(txBuff);
+    const vtx = VersionedTransaction.deserialize(txBuff);
+    console.log(vtx);
+    // Sign with wallet
+    try {
+      vtx.sign([wallet.payer]);
+      const rpcSendOpts: SendOptions = { skipPreflight: true };
+      const hash = await connection.sendRawTransaction(
+        vtx.serialize(),
+        rpcSendOpts
+      );
+      return { code: 200, data: hash, status: true };
+    } catch (e: any) {
+      return { code: 401, data: e.message, status: false };
+    }
+  } catch (error: any) {
+    return {
+      code: 401,
+      status: false,
+      data: `Fail to init transaction ${error}`,
+    };
   }
 }

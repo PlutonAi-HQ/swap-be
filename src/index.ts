@@ -3,7 +3,12 @@ import express from "express";
 import dotenv from "dotenv";
 import { PublicKey } from "@solana/web3.js";
 import { init } from "./util/init.js";
-import { getBalance, jupiterLimitOrder, jupiterTrade } from "./util/jupiter.js";
+import {
+  getBalance,
+  jupiterCancelOrders,
+  jupiterLimitOrder,
+  jupiterTrade,
+} from "./util/jupiter.js";
 import type { ILimitOrder, ISwapReqest } from "./type.js";
 import { connection } from "./util/init.js";
 import {
@@ -27,20 +32,19 @@ app.get("/", async (_req, res) => {
   res.send(`Expressjs is running!`);
 });
 
-app.post("/balance", async (_req, res) => {
-  const { wallet } = init(
-    "2E5DFNv7z94isfUBUzfNJyLMM6MEXy5s6dtFnAkZQVsVNfdv23Etib8NXDVQy8qq8eCPHEcXHA9NoikdgaokFEd4"
-  );
-  const balance = await getBalance(
-    wallet.publicKey,
-    new PublicKey(_req.body.outputMint)
-  );
-  res.send(`balance ${balance}`);
-});
+// app.post("/balance", async (_req, res) => {
+//   const { wallet } = init(
+
+//   );
+//   const balance = await getBalance(
+//     wallet.publicKey,
+//     new PublicKey(_req.body.outputMint)
+//   );
+//   res.send(`balance ${balance}`);
+// });
 
 app.post("/jupiterLimitOrder", async (_req, res) => {
   try {
-    console.log(_req.body);
     // convert body to ILimitOrder
     const body: ILimitOrder = _req.body;
     const { wallet } = init(body.privateKey);
@@ -85,6 +89,12 @@ app.post("/jupiterSwap", async (_req, res) => {
   } catch (err) {
     res.send("Invalid request body");
   }
+});
+
+app.post("/cancelOrders", async (_req, res) => {
+  const { wallet } = init(_req.body.privateKey);
+  const result = await jupiterCancelOrders(wallet);
+  res.send(result);
 });
 
 app.listen(3000, () => {
