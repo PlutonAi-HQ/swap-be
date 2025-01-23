@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/8fb626a6-db68-4f5d-a614-32f67d6d0f29)# 🚀Swap API
+# 🚀Swap API
 
 This project using [Jupiter Station](https://station.jup.ag/docs/) to implement Solana network token swapping 
 
@@ -23,7 +23,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   ![image](https://github.com/user-attachments/assets/41a5787a-68bb-41aa-983f-b575e3ef13fc)
 
 
-## POST /jupiterLimitOrder  value transfer must > $5
+## POST /jupiterLimitOrder  value transfer must > $5 ⚠️ Chỗ này lượng sol đổi ra giá usdc phải > $5, usdc input > 5USDC
 - Description: Set up a limit order for token swaps.
 - Body Parameters:
   - privateKey(string): User's private key.
@@ -40,6 +40,14 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   - Successfull: {code: 200, status: true, data: ```transaction_id``` } 
   - Fail: {code: , status: false, data: ```error_message``` }
 
+
+## POST Cancel Orders: 
+- Description: cancel all the orders
+- Body Parameters:
+  - privateKey(string): User's private key.
+- Response:
+  - Successfull: {code: 200, status: true, data: ```transaction_id``` }
+  - Fail: {code: , status: false, data: "No matching orders found" }
 
 ## 📂 Project Structure
 - ```src/ultils/init.ts``` : Init the wallet and keypair by giving private key
