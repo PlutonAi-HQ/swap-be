@@ -6,6 +6,7 @@ import { init } from "./util/init.js";
 import {
   getBalance,
   jupiterCancelOrders,
+  jupiterGetOrders,
   jupiterLimitOrder,
   jupiterTrade,
 } from "./util/jupiter.js";
@@ -94,6 +95,11 @@ app.post("/jupiterSwap", async (_req, res) => {
 app.post("/cancelOrders", async (_req, res) => {
   const { wallet } = init(_req.body.privateKey);
   const result = await jupiterCancelOrders(wallet);
+  res.send(result);
+});
+
+app.post("/getOrders", async (_req, res) => {
+  const result = await jupiterGetOrders(_req.body.address);
   res.send(result);
 });
 

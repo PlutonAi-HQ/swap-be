@@ -5,6 +5,7 @@ import { Wallet } from "@project-serum/anchor";
 import { connection } from "./init.js";
 import { Keypair } from "@solana/web3.js";
 import fetch from "node-fetch";
+import { get } from "http";
 
 type CreateOrder = {
   inputMint: string;
@@ -29,6 +30,11 @@ type CreateOrderResponse = {
   tx: string;
 };
 
+type GetLimitOrders = {
+  maker: string;
+  computeUnitPrice: "auto";
+};
+
 type CancelOrders = {
   maker: string;
 
@@ -48,6 +54,12 @@ interface Response {
   code: number;
   status: boolean;
   data: string;
+}
+
+interface GetOrdersResponse {
+  code: number;
+  status: boolean;
+  data: string | string[];
 }
 
 export async function getBalance(
@@ -328,4 +340,34 @@ export async function jupiterCancelOrders(wallet: Wallet) {
       data: `Fail to init transaction ${error}`,
     };
   }
+}
+
+export async function jupiterGetOrders(
+  address: string
+): Promise<GetOrdersResponse> {
+  const getOrdersBody: GetLimitOrders = {
+    maker: address,
+    computeUnitPrice: "auto",
+  };
+  const fetchOpts = {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(getOrdersBody),
+  };
+  const res = await fetch("https://api.jup.ag/limit/v2/cancelOrders", fetchOpts)
+    .then((res) => res.json())
+    .then((res) => {
+      console.log(res.txs);
+      if (res.status == 400) {
+        return { code: 200, status: true, data: [] };
+      }
+      return { code: 200, status: true, data: res.txs };
+    })
+    .catch((err) => {
+      return { code: 401, status: false, data: err };
+    });
+  return { code: res.code, status: res.status, data: `${res.data}` };
 }
