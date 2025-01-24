@@ -18,7 +18,8 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   - Response structure: {code: number, status: boolean, data: string}
   - Successfull: {code: 200, status: true, data: ```transaction_id``` } 
   - Fail: {code: , status: false, data: ```error_message``` } - when the input is wrong or can not submit tx to blockchain (Congestion)
-  - ⚠️ Code 500: Submit transaction timeout, neet to retry. 
+  - ⚠️ Code 500: Submit transaction timeout, neet to retry.
+  - Code 403: Do not have enough balance.
 
   ![image](https://github.com/user-attachments/assets/41a5787a-68bb-41aa-983f-b575e3ef13fc)
 
@@ -39,15 +40,28 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
 - Response: Returns the limit order details.
   - Successfull: {code: 200, status: true, data: ```transaction_id``` } 
   - Fail: {code: , status: false, data: ```error_message``` }
+  - Code 403: Do not have enough balance.
 
 
-## POST Cancel Orders: 
+## POST /cancelOrders: 
 - Description: cancel all the orders
 - Body Parameters:
   - privateKey(string): User's private key.
 - Response:
   - Successfull: {code: 200, status: true, data: ```transaction_id``` }
   - Fail: {code: , status: false, data: "No matching orders found" }
+ 
+## POST /balance
+- Description: Get the balance of the given address.
+- Request Body:
+  - address: string - Wallet address
+  - tokenAddress: string - Token address
+- Response:
+  - Success: {balance: xxxx}
+  - Fauil: {balance:0}
+
+  ![image](https://github.com/user-attachments/assets/36f94258-c6dd-4e89-bc9c-f8ab608aa7e2)
+
 
 ## 📂 Project Structure
 - ```src/ultils/init.ts``` : Init the wallet and keypair by giving private key
