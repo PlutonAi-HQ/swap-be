@@ -5,6 +5,7 @@ import { PublicKey } from "@solana/web3.js";
 import { init } from "./util/init.js";
 import {
   getBalance,
+  getSolBalance,
   jupiterCancelOrders,
   jupiterGetOrders,
   jupiterLimitOrder,
@@ -101,6 +102,19 @@ app.post("/cancelOrders", async (_req, res) => {
 app.post("/getOrders", async (_req, res) => {
   const result = await jupiterGetOrders(_req.body.address);
   res.send(result);
+});
+
+app.post("/balance", async (_req, res) => {
+  if (_req.body.tokenAddress == "So11111111111111111111111111111111111111112") {
+    const result = await getSolBalance(new PublicKey(_req.body.address));
+    res.send({ balance: result });
+  } else {
+    const result = await getBalance(
+      new PublicKey(_req.body.address),
+      new PublicKey(_req.body.tokenAddress)
+    );
+    res.send({ balance: result });
+  }
 });
 
 app.listen(3000, () => {

@@ -5,7 +5,6 @@ import { Wallet } from "@project-serum/anchor";
 import { connection } from "./init.js";
 import { Keypair } from "@solana/web3.js";
 import fetch from "node-fetch";
-import { get } from "http";
 
 type CreateOrder = {
   inputMint: string;
@@ -185,7 +184,7 @@ export async function jupiterTrade(
   }
 }
 
-async function getSolBalance(publicKey: PublicKey) {
+export async function getSolBalance(publicKey: PublicKey) {
   try {
     // Get the balance (in lamports)
     const balance = await connection.getBalance(publicKey);
@@ -213,7 +212,6 @@ export async function jupiterLimitOrder(
   //   ? await getSolBalance(wallet.publicKey)
   //   : await getBalance(wallet.publicKey, outputMint);
 
-  console.log("inputMintOwn", inputMintOwn);
   // console.log("outputMintOwn", outputMintOwn);
 
   if (inputMintOwn && inputMintOwn < makingAmount) {
@@ -262,9 +260,7 @@ export async function jupiterLimitOrder(
       );
 
       //   Sign and submit the transaction on chain
-      console.log(response.status);
       // Deserialise base64 tx response
-      console.log(fetchOpts);
       const { order, tx } = await response.json();
       const txBuff = Buffer.from(tx, "base64");
       const vtx = VersionedTransaction.deserialize(txBuff);
@@ -316,12 +312,9 @@ export async function jupiterCancelOrders(wallet: Wallet) {
 
     // Deserialise base64 tx response
     const { txs } = await response.json();
-    console.log(txs[0]);
 
     const txBuff = Buffer.from(txs[0], "base64");
-    console.log(txBuff);
     const vtx = VersionedTransaction.deserialize(txBuff);
-    console.log(vtx);
     // Sign with wallet
     try {
       vtx.sign([wallet.payer]);
@@ -361,7 +354,6 @@ export async function jupiterGetOrders(
   const res = await fetch("https://api.jup.ag/limit/v2/cancelOrders", fetchOpts)
     .then((res) => res.json())
     .then((res) => {
-      console.log(res.txs);
       if (res.status == 400) {
         return { code: 200, status: true, data: [] };
       }
