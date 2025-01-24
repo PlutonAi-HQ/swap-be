@@ -107,7 +107,7 @@ export async function jupiterTrade(
       : await getBalance(wallet.publicKey, inputMint);
   if (inputMintOwn && inputMintOwn < inputAmount) {
     return {
-      code: 401,
+      code: 403,
       status: false,
       data: `Token ${inputMint.toBase58()} do not enough balance`,
     };
@@ -205,19 +205,20 @@ export async function jupiterLimitOrder(
   wallet: Wallet // user wallet
 ) {
   const inputMintOwn =
-    inputMint.toBase58() == ""
+    inputMint.toBase58() == "So11111111111111111111111111111111111111112"
       ? await getSolBalance(wallet.publicKey)
       : await getBalance(wallet.publicKey, inputMint);
-  const outputMintOwn =
-    outputMint.toBase58() == ""
-      ? await getSolBalance(wallet.publicKey)
-      : await getBalance(wallet.publicKey, outputMint);
+  // const outputMintOwn =
+  // outputMint.toBase58() == ""
+  //   ? await getSolBalance(wallet.publicKey)
+  //   : await getBalance(wallet.publicKey, outputMint);
 
   console.log("inputMintOwn", inputMintOwn);
-  console.log("outputMintOwn", outputMintOwn);
+  // console.log("outputMintOwn", outputMintOwn);
 
   if (inputMintOwn && inputMintOwn < makingAmount) {
     return {
+      code: 403,
       data: `Token ${inputMint.toBase58()} do not enough balance`,
       status: false,
     };
