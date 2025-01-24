@@ -102,7 +102,7 @@ export async function jupiterTrade(
   keypair: Keypair // user public key
 ): Promise<Response> {
   const inputMintOwn =
-    inputMint.toBase58() == ""
+    inputMint.toBase58() == "So11111111111111111111111111111111111111112"
       ? await getSolBalance(wallet.publicKey)
       : await getBalance(wallet.publicKey, inputMint);
   if (inputMintOwn && inputMintOwn < inputAmount) {
