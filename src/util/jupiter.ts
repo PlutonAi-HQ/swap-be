@@ -104,6 +104,10 @@ export async function jupiterTrade(
     inputMint.toBase58() == "So11111111111111111111111111111111111111112"
       ? await getSolBalance(wallet.publicKey)
       : await getBalance(wallet.publicKey, inputMint);
+  const outputBalance =
+    outputMint.toBase58() == "So11111111111111111111111111111111111111112"
+      ? await getSolBalance(wallet.publicKey)
+      : await getBalance(wallet.publicKey, outputMint);
   if (inputMintOwn && inputMintOwn < inputAmount) {
     return {
       code: 403,
@@ -175,6 +179,14 @@ export async function jupiterTrade(
         signature: txid,
       });
     } catch (e) {
+      const new_balance =
+        outputMint.toBase58() == "So11111111111111111111111111111111111111112"
+          ? await getSolBalance(wallet.publicKey)
+          : await getBalance(wallet.publicKey, outputMint);
+      console.log("new_balance", new_balance, "prev balance", outputBalance);
+      if (new_balance > outputBalance) {
+        return { code: 200, status: true, data: txid };
+      }
       return { code: 500, status: false, data: "Transaction submit timeout" };
     }
     // const signature = await connection.sendTransaction(transaction);
