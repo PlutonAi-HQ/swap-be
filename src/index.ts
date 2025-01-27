@@ -79,7 +79,7 @@ app.post("/jupiterSwap", async (_req, res) => {
         body.inputAmount, // amount of input token
         new PublicKey(body.outputMint), // output token address
         100, // 1% slippage
-        100000000, // 20000000 lamports priority fee
+        1000000000, // 20000000 lamports priority fee
         wallet, // user waller
         keypair
       );

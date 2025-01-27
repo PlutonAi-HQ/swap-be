@@ -149,12 +149,8 @@ export async function jupiterTrade(
           userPublicKey: keypair.publicKey.toString(),
           wrapAndUnwrapSol: true,
           dynamicComputeUnitLimit: true,
-          prioritizationFeeLamports: "auto",
+          prioritizationFeeLamports: { autoMultiplier: 3 },
           feeAccount: null,
-          priorityLevelWithMaxLamports: {
-            maxLamports: priorityFee, // max priority fee
-            priorityLevel: "veryHigh", // If you want to land transaction fast, set this to use `veryHigh`. You will pay on average higher priority fee.
-          },
         }),
       })
     ).json();
