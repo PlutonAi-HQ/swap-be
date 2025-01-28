@@ -55,16 +55,24 @@ interface Response {
   data: string;
 }
 
+interface IBalanceResponse {
+  code: number;
+  message: string;
+
+  balance: number | null;
+}
+
 interface GetOrdersResponse {
   code: number;
   status: boolean;
+
   data: string | string[];
 }
 
 export async function getBalance(
   publicKey: PublicKey,
   tikenAddress: PublicKey
-): Promise<number> {
+): Promise<IBalanceResponse> {
   try {
     // Get all token accounts owned by the wallet for the specific mint address
     const tokenAccounts = await connection.getTokenAccountsByOwner(publicKey, {
@@ -72,7 +80,11 @@ export async function getBalance(
     });
 
     if (tokenAccounts.value.length === 0) {
-      return 0;
+      return {
+        code: 401,
+        message: "This account do not own the token",
+        balance: null,
+      };
     }
 
     // Loop through the accounts and fetch their balances
@@ -82,12 +94,31 @@ export async function getBalance(
         tokenAccountAddress
       );
 
-      return parseInt(balance.value.amount) || 0;
+      return parseInt(balance.value.amount)
+        ? {
+            code: 200,
+            message: "Get balance successfull!",
+            balance: parseInt(balance.value.amount),
+          }
+        : {
+            code: 401,
+            message: "This account do not own the token",
+            balance: null,
+          };
     }
-    return 0;
+
+    return {
+      code: 402,
+      message: "This account do not own the token",
+      balance: null,
+    };
   } catch (error) {
     console.error("Error fetching token accounts:", error);
-    return 0;
+    return {
+      code: 403,
+      message: "The token address or wallet address is invalid",
+      balance: null,
+    };
   }
 }
 
@@ -108,7 +139,7 @@ export async function jupiterTrade(
     outputMint.toBase58() == "So11111111111111111111111111111111111111112"
       ? await getSolBalance(wallet.publicKey)
       : await getBalance(wallet.publicKey, outputMint);
-  if (inputMintOwn && inputMintOwn < inputAmount) {
+  if (inputMintOwn.balance && inputMintOwn.balance < inputAmount) {
     return {
       code: 403,
       status: false,
@@ -148,7 +179,6 @@ export async function jupiterTrade(
           quoteResponse,
           userPublicKey: keypair.publicKey.toString(),
           wrapAndUnwrapSol: true,
-          dynamicComputeUnitLimit: true,
           prioritizationFeeLamports: { autoMultiplier: 3 },
           feeAccount: null,
         }),
@@ -180,7 +210,11 @@ export async function jupiterTrade(
           ? await getSolBalance(wallet.publicKey)
           : await getBalance(wallet.publicKey, outputMint);
       console.log("new_balance", new_balance, "prev balance", outputBalance);
-      if (new_balance > outputBalance) {
+      if (
+        outputBalance.balance &&
+        new_balance.balance &&
+        new_balance.balance > outputBalance.balance
+      ) {
         return { code: 200, status: true, data: txid };
       }
       return { code: 500, status: false, data: "Transaction submit timeout" };
@@ -192,14 +226,24 @@ export async function jupiterTrade(
   }
 }
 
-export async function getSolBalance(publicKey: PublicKey) {
+export async function getSolBalance(
+  publicKey: PublicKey
+): Promise<IBalanceResponse> {
   try {
     // Get the balance (in lamports)
     const balance = await connection.getBalance(publicKey);
 
-    return balance;
+    return {
+      code: 200,
+      message: "Get balance successfull!",
+      balance: balance,
+    };
   } catch (error) {
-    return 0;
+    return {
+      code: 403,
+      message: "The token address or wallet address is invalid",
+      balance: null,
+    };
   }
 }
 
@@ -222,7 +266,7 @@ export async function jupiterLimitOrder(
 
   // console.log("outputMintOwn", outputMintOwn);
 
-  if (inputMintOwn && inputMintOwn < makingAmount) {
+  if (inputMintOwn.balance && inputMintOwn.balance < makingAmount) {
     return {
       code: 403,
       data: `Token ${inputMint.toBase58()} do not enough balance`,
