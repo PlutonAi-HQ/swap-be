@@ -57,8 +57,20 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   - address: string - Wallet address
   - tokenAddress: string - Token address
 - Response:
-  - Success: {balance: xxxx}
-  - Fauil: {balance:0}
+  - Success: "balance": {
+        "code": 200,
+        "message": "Get balance successfull!",
+        "balance": 3983896
+    }
+  - Fail:
+    - {"balance": {
+        "code": 403,
+        "message": "The token address or wallet address is invalid",
+        "balance": null}}
+    - {
+      code: 402 && 401,
+      message: "This account do not own the token",
+      balance: null,}
 
   ![image](https://github.com/user-attachments/assets/36f94258-c6dd-4e89-bc9c-f8ab608aa7e2)
 
