@@ -63,16 +63,17 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
         "balance": 3983896
     }
   - Fail:
-    - {"balance": {
+    - {
         "code": 403,
         "message": "The token address or wallet address is invalid",
-        "balance": null}}
+        "balance": null}
     - {
       code: 402 && 401,
       message: "This account do not own the token",
-      balance: null,}
+      balance: null}
 
-  ![image](https://github.com/user-attachments/assets/36f94258-c6dd-4e89-bc9c-f8ab608aa7e2)
+  ![image](https://github.com/user-attachments/assets/eb558133-8f9e-4a22-ace3-6f8e8f39c7d3)
+
 
 
 ## 📂 Project Structure
