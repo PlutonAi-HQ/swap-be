@@ -179,7 +179,15 @@ export async function jupiterTrade(
           quoteResponse,
           userPublicKey: keypair.publicKey.toString(),
           wrapAndUnwrapSol: true,
-          prioritizationFeeLamports: { autoMultiplier: 3 },
+          dynamicComputeUnitLimit: true,
+          dynamicSlippage: true,
+          prioritizationFeeLamports: {
+            priorityLevelWithMaxLamports: {
+              maxLamports: 20000000,
+              global: false,
+              priorityLevel: "veryHigh",
+            },
+          },
           feeAccount: null,
         }),
       })
