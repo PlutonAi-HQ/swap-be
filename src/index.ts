@@ -51,14 +51,24 @@ app.post("/jupiterLimitOrder", async (_req, res) => {
     const body: ILimitOrder = _req.body;
     const { wallet } = init(body.privateKey);
 
-    const data = await jupiterLimitOrder(
-      body.makingAmount, // amount of token to sell
-      body.takingAmount, // amount of token to buy
-      new PublicKey(body.inputMint), // input token address
-      new PublicKey(body.outputMint), // output token address
-      wallet
-    );
-    res.send(data);
+    try {
+      const inputToken = new PublicKey(body.inputMint);
+      try {
+        const outputToken = new PublicKey(body.outputMint);
+        const data = await jupiterLimitOrder(
+          body.makingAmount, // amount of token to sell
+          body.takingAmount, // amount of token to buy
+          inputToken, // input token address
+          outputToken, // output token address
+          wallet
+        );
+        res.send(data);
+      } catch (err) {
+        return res.send("Invalid output token address");
+      }
+    } catch (err) {
+      return res.send("Invalid input token address");
+    }
   } catch (err) {
     console.log(err);
     res.send("Invalid request body");
@@ -72,21 +82,26 @@ app.post("/jupiterSwap", async (_req, res) => {
     // init wallet and keypair
     const { wallet, keypair } = init(body.privateKey);
     console.log("jupiter swapp");
-
     try {
-      const result = await jupiterTrade(
-        new PublicKey(body.inputMint), // input token address
-        body.inputAmount, // amount of input token
-        new PublicKey(body.outputMint), // output token address
-        100, // 1% slippage
-        1000000000, // 20000000 lamports priority fee
-        wallet, // user waller
-        keypair
-      );
+      const inputToken = new PublicKey(body.inputMint);
 
-      res.send(result);
-    } catch (err) {
-      throw err;
+      try {
+        const result = await jupiterTrade(
+          inputToken, // input token address
+          body.inputAmount, // amount of input token
+          new PublicKey(body.outputMint), // output token address
+          100, // 1% slippage
+          1000000000, // 20000000 lamports priority fee
+          wallet, // user waller
+          keypair
+        );
+
+        res.send(result);
+      } catch (err) {
+        throw err;
+      }
+    } catch (e) {
+      return res.send("Invalid intput token address");
     }
   } catch (err) {
     res.send("Invalid request body");

@@ -122,6 +122,18 @@ export async function getBalance(
   }
 }
 
+async function scaledAmount(address: string, amount: number) {
+  const response = await (
+    await fetch(`https://api.jup.ag/tokens/v1/token/${address}`)
+  ).json();
+  if (response) {
+    //return the scaledamount if token found
+    return amount * 10 ** response.decimals;
+  }
+  // return -1 if token not found
+  return -1;
+}
+
 export async function jupiterTrade(
   inputMint: PublicKey, // the input token to swap from
   inputAmount: number, // the amount of input token to swap
@@ -131,6 +143,15 @@ export async function jupiterTrade(
   wallet: Wallet, // user wallet
   keypair: Keypair // user public key
 ): Promise<Response> {
+  const inputScaled = await scaledAmount(inputMint.toBase58(), inputAmount);
+
+  if (inputScaled == -1) {
+    return {
+      code: 403,
+      status: false,
+      data: `Token ${inputMint.toBase58()} not found`,
+    };
+  }
   const inputMintOwn =
     inputMint.toBase58() == "So11111111111111111111111111111111111111112"
       ? await getSolBalance(wallet.publicKey)
@@ -139,7 +160,7 @@ export async function jupiterTrade(
     outputMint.toBase58() == "So11111111111111111111111111111111111111112"
       ? await getSolBalance(wallet.publicKey)
       : await getBalance(wallet.publicKey, outputMint);
-  if (inputMintOwn.balance && inputMintOwn.balance < inputAmount) {
+  if (inputMintOwn.balance && inputMintOwn.balance < inputScaled) {
     return {
       code: 403,
       status: false,
@@ -148,18 +169,13 @@ export async function jupiterTrade(
   }
   try {
     // Convert input amount to correct decimals
-    const inputDecimals = (await getMint(connection, inputMint)).decimals;
-
-    // Calculate the correct amount based on actual decimals
-    const scaledAmount = inputAmount * Math.pow(10, inputDecimals);
-
     // request for transaction quote
     const quoteResponse = await (
       await fetch(
         `https://quote-api.jup.ag/v6/quote?` +
           `inputMint=${inputMint.toString()}` +
           `&outputMint=${outputMint.toString()}` +
-          `&amount=${inputAmount}` +
+          `&amount=${inputScaled}` +
           `&slippageBps=${slippageBps}` +
           `&onlyDirectRoutes=true` +
           `&maxAccounts=20`
@@ -267,6 +283,29 @@ export async function jupiterLimitOrder(
     inputMint.toBase58() == "So11111111111111111111111111111111111111112"
       ? await getSolBalance(wallet.publicKey)
       : await getBalance(wallet.publicKey, inputMint);
+
+  const scaleInputAmount = await scaledAmount(
+    inputMint.toBase58(),
+    makingAmount
+  );
+  if (scaleInputAmount == -1) {
+    return {
+      code: 403,
+      status: false,
+      data: `Token ${inputMint.toBase58()} not found`,
+    };
+  }
+  const scaleOutputAmount = await scaledAmount(
+    outputMint.toBase58(),
+    takingAmount
+  );
+  if (scaleOutputAmount == -1) {
+    return {
+      code: 403,
+      status: false,
+      data: `Token ${outputMint.toBase58()} not found`,
+    };
+  }
   // const outputMintOwn =
   // outputMint.toBase58() == ""
   //   ? await getSolBalance(wallet.publicKey)
@@ -274,7 +313,7 @@ export async function jupiterLimitOrder(
 
   // console.log("outputMintOwn", outputMintOwn);
 
-  if (inputMintOwn.balance && inputMintOwn.balance < makingAmount) {
+  if (inputMintOwn.balance && inputMintOwn.balance < scaleInputAmount) {
     return {
       code: 403,
       data: `Token ${inputMint.toBase58()} do not enough balance`,
@@ -293,8 +332,8 @@ export async function jupiterLimitOrder(
       maker: wallet.publicKey.toBase58(),
       payer: wallet.publicKey.toBase58(),
       params: {
-        makingAmount: `${makingAmount}`,
-        takingAmount: `${takingAmount}`,
+        makingAmount: `${scaleInputAmount}`,
+        takingAmount: `${scaleOutputAmount}`,
       },
 
       // "auto" sets the priority fee based on network congestion
