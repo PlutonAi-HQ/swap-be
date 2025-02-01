@@ -122,11 +122,12 @@ app.post("/getOrders", async (_req, res) => {
 app.post("/balance", async (_req, res) => {
   if (_req.body.tokenAddress == "So11111111111111111111111111111111111111112") {
     const result = await getSolBalance(new PublicKey(_req.body.address));
-    res.send({ balance: result });
+    res.send({ balance: (result.balance ? result.balance : 0) / 1000000000 });
   } else {
     const result = await getBalance(
       new PublicKey(_req.body.address),
-      new PublicKey(_req.body.tokenAddress)
+      new PublicKey(_req.body.tokenAddress),
+      false
     );
     res.send({ balance: result });
   }

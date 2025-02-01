@@ -71,7 +71,8 @@ interface GetOrdersResponse {
 
 export async function getBalance(
   publicKey: PublicKey,
-  tikenAddress: PublicKey
+  tikenAddress: PublicKey,
+  scale: boolean = true
 ): Promise<IBalanceResponse> {
   try {
     // Get all token accounts owned by the wallet for the specific mint address
@@ -93,12 +94,14 @@ export async function getBalance(
       const balance = await connection.getTokenAccountBalance(
         tokenAccountAddress
       );
-
+      console.log(balance);
       return parseInt(balance.value.amount)
         ? {
             code: 200,
             message: "Get balance successfull!",
-            balance: parseInt(balance.value.amount),
+            balance: scale
+              ? parseInt(balance.value.amount)
+              : parseFloat(balance.value.uiAmountString || "0"),
           }
         : {
             code: 401,
