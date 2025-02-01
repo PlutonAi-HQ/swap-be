@@ -284,7 +284,7 @@ export async function getSolBalance(
   }
 }
 
-export async function limitCheck(
+export async function getCurrentOutputAmount(
   inputToken: string,
   outputToken: string,
   inputAmoount: number
@@ -298,6 +298,33 @@ export async function limitCheck(
   return currentSwapAmount;
 }
 
+export async function limitRateCheck(
+  inputMint: string, // input token mint address
+  outputMint: string, // output token mint address
+  inputAmount: number, // amount of input token
+  outputAmount: number
+) {
+  const currentUsdRate = await getCurrentOutputAmount(
+    inputMint,
+    outputMint,
+    inputAmount
+  );
+
+  if (currentUsdRate * 10 < outputAmount) {
+    return {
+      code: 403,
+      status: false,
+      data: `Token ${outputMint} is to large to swap, must less than 1000% of the current price, current rate: ${
+        (outputAmount * 100) / currentUsdRate
+      }%`,
+    };
+  }
+  return {
+    code: 200,
+    status: true,
+    data: `Current rate: ${(outputAmount * 100) / currentUsdRate}%`,
+  };
+}
 // Get the serialized transactions to create the limit order
 export async function jupiterLimitOrder(
   makingAmount: number, // amount of token to sell
@@ -323,7 +350,7 @@ export async function jupiterLimitOrder(
     };
   }
   //check if the output expected is larger than 1000% current price
-  const currentOutputAmount = await limitCheck(
+  const currentOutputAmount = await getCurrentOutputAmount(
     inputMint.toBase58(),
     outputMint.toBase58(),
     makingAmount

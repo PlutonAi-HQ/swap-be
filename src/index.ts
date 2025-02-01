@@ -5,14 +5,16 @@ import { PublicKey } from "@solana/web3.js";
 import { init } from "./util/init.js";
 import {
   getBalance,
+  getCurrentOutputAmount,
   getPrice,
   getSolBalance,
   jupiterCancelOrders,
   jupiterGetOrders,
   jupiterLimitOrder,
   jupiterTrade,
+  limitRateCheck,
 } from "./util/jupiter.js";
-import type { ILimitOrder, ISwapReqest } from "./type.js";
+import type { ILimitOrder, ILimitRateCheck, ISwapReqest } from "./type.js";
 import { connection } from "./util/init.js";
 import {
   TOKEN_PROGRAM_ID,
@@ -133,6 +135,22 @@ app.post("/balance", async (_req, res) => {
 
     res.send({ balance: result });
   }
+});
+
+app.get("/rateLimitCheck", async (_req, res) => {
+  const params: ILimitRateCheck = {
+    inputMint: _req.query.inputMint as string,
+    outputMint: _req.query.outputMint as string,
+    inputAmount: parseFloat(_req.query.inputAmount as string),
+    outputAmount: parseFloat(_req.query.outputAmount as string),
+  };
+  const data = await limitRateCheck(
+    params.inputMint,
+    params.outputMint,
+    params.inputAmount,
+    params.outputAmount
+  );
+  res.send(data);
 });
 
 app.listen(3000, () => {
