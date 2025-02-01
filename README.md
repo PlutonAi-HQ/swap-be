@@ -2,6 +2,23 @@
 
 This project using [Jupiter Station](https://station.jup.ag/docs/) to implement Solana network token swapping 
 
+## GET /rateLimitCheck
+- Description: Check if user input and output in ***limitOrder*** is not out of limit rate
+- Params:
+  - inputMint (string): input token address
+  - outputMint (string): output token address
+  - inputAmount (number): input token amount
+  - outputAmount (number): output token amount
+- Response:
+  
+  ![image](https://github.com/user-attachments/assets/f9244ffc-ea5a-47d4-9a70-1f18bfe14d59)
+
+  Or
+  
+  ![image](https://github.com/user-attachments/assets/9dfe4eca-f974-4b8e-a035-cdcaa1d9125f)
+
+
+
 ## POST /jupiterSwap
 - Description: Perform a token swap.
 - Body Parameters:
