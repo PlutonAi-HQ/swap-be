@@ -5,6 +5,7 @@ import { PublicKey } from "@solana/web3.js";
 import { init } from "./util/init.js";
 import {
   getBalance,
+  getPrice,
   getSolBalance,
   jupiterCancelOrders,
   jupiterGetOrders,
@@ -129,6 +130,7 @@ app.post("/balance", async (_req, res) => {
       new PublicKey(_req.body.tokenAddress),
       false
     );
+
     res.send({ balance: result });
   }
 });

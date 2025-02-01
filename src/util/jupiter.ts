@@ -137,6 +137,15 @@ async function scaledAmount(address: string, amount: number) {
   return -1;
 }
 
+export async function getPrice(tokenAddress: string): Promise<number> {
+  const price = await (
+    await fetch(
+      `https://api.dexscreener.com/token-pairs/v1/solana/${tokenAddress}`
+    )
+  ).json();
+  return price[0] ? price[0].priceUsd : -1;
+}
+
 export async function jupiterTrade(
   inputMint: PublicKey, // the input token to swap from
   inputAmount: number, // the amount of input token to swap
@@ -155,6 +164,7 @@ export async function jupiterTrade(
       data: `Token ${inputMint.toBase58()} not found`,
     };
   }
+
   const inputMintOwn =
     inputMint.toBase58() == "So11111111111111111111111111111111111111112"
       ? await getSolBalance(wallet.publicKey)
@@ -274,6 +284,20 @@ export async function getSolBalance(
   }
 }
 
+export async function limitCheck(
+  inputToken: string,
+  outputToken: string,
+  inputAmoount: number
+) {
+  // input token A -> x usdc | x usdc -> y token B
+  // get input token orice
+  const inputAsUSDC = (await getPrice(inputToken)) * inputAmoount;
+  // calculate the amount of token B can be bought with the usdc by token A
+  const currentSwapAmount = inputAsUSDC / (await getPrice(outputToken));
+  // check if the output token amount is less than the maximum expected
+  return currentSwapAmount;
+}
+
 // Get the serialized transactions to create the limit order
 export async function jupiterLimitOrder(
   makingAmount: number, // amount of token to sell
@@ -296,6 +320,32 @@ export async function jupiterLimitOrder(
       code: 403,
       status: false,
       data: `Token ${inputMint.toBase58()} not found`,
+    };
+  }
+  //check if the output expected is larger than 1000% current price
+  const currentOutputAmount = await limitCheck(
+    inputMint.toBase58(),
+    outputMint.toBase58(),
+    makingAmount
+  );
+
+  //check if expected output amount is > than 10x of the current price output
+  if (currentOutputAmount * 10 <= takingAmount) {
+    return {
+      code: 403,
+      status: false,
+      data: `Token ${outputMint.toBase58()} is to large to swap, must less than 1000% of the current price, current rate: ${
+        (takingAmount * 100) / currentOutputAmount
+      }%`,
+    };
+  }
+
+  const inputPrice = (await getPrice(inputMint.toBase58())) * makingAmount;
+  if (inputPrice <= 5) {
+    return {
+      code: 403,
+      status: false,
+      data: `Token ${inputMint.toBase58()} not enough to swap, minimum amount is 5 USD, current input ~ ${inputPrice}USD`,
     };
   }
   const scaleOutputAmount = await scaledAmount(
@@ -466,3 +516,5 @@ export async function jupiterGetOrders(
     });
   return { code: res.code, status: res.status, data: `${res.data}` };
 }
+
+//limit at 1000%
