@@ -19,6 +19,46 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
 
 
 
+## GET /allTokens
+- Description: Get all balance of tokens by giving wallet address.
+- Request Params:
+  - address (string): user wallet address,
+- Ex: get balance in Dw3dsx3MpoqMnNY4jL5gz33XSod2DT6qUKd3iHn5AaeJ wallet
+  ```
+    http://localhost:3000/allTokens?address=Dw3dsx3MpoqMnNY4jL5gz33XSod2DT6qUKd3iHn5AaeJ
+  ```
+- Sample response:
+  ```json
+  {
+    "code": 200,
+    "status": true,
+    "data": [
+        {
+            "symbol": "DEFAI",
+            "balance": 20000000
+        },
+        {
+            "symbol": "USDC",
+            "balance": 7.529918
+        },
+        {
+            "symbol": "SOL",
+            "balance": 0.037282
+        }
+    ]
+  }
+
+  ```
+- Error:
+  - Invalid address:
+    ```json
+    {
+    "code": 403,
+    "data": "Invalid address",
+    "status": false
+    }
+    ```
+
 ## POST /jupiterSwap
 - Description: Perform a token swap.
 - Body Parameters:
