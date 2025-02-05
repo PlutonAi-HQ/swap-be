@@ -35,15 +35,18 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
     "data": [
         {
             "symbol": "DEFAI",
+            "address": "DaXtdmYZLDbmwDEs7DghWwvdPdxMe3mqRKJMbNUGPEDk",
             "balance": 20000000
         },
         {
             "symbol": "USDC",
+            "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
             "balance": 7.529918
         },
         {
             "symbol": "SOL",
-            "balance": 0.037282
+            "address": "So11111111111111111111111111111111111111112",
+            "balance": 0.037282374
         }
     ]
   }
