@@ -556,7 +556,7 @@ export async function getAllTokensBalance(publicKey: PublicKey) {
     const formatedData = await Promise.all(
       tokenAccounts.value.map(async (item) => {
         const mint = new PublicKey(item.account.data.parsed.info.mint);
-        const symbol = await getTokenSymbol(mint.toString());
+        const symbol = await getTokenSymbol(mint);
         return {
           symbol: symbol || mint,
           balance: parseFloat(
@@ -567,7 +567,7 @@ export async function getAllTokensBalance(publicKey: PublicKey) {
     );
     formatedData.push({
       symbol: "SOL",
-      balance: solBalance.balance || 0,
+      balance: solBalance.balance ? solBalance.balance / 10 ** 9 : 0,
     });
     return { code: 200, status: true, data: formatedData };
   } catch (e) {
@@ -575,11 +575,9 @@ export async function getAllTokensBalance(publicKey: PublicKey) {
   }
 }
 
-async function getTokenSymbol(tokenMintAddress: string) {
+async function getTokenSymbol(mintPublicKey: PublicKey) {
   const metaplex = Metaplex.make(connection);
   try {
-    const mintPublicKey = new PublicKey(tokenMintAddress);
-
     // Fetch token metadata
     const metadata = await metaplex
       .nfts()

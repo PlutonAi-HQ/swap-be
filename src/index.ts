@@ -155,9 +155,13 @@ app.get("/rateLimitCheck", async (_req, res) => {
 });
 
 app.get("/allTokens", async (_req, res) => {
-  const publickey = new PublicKey(_req.query.address as string);
-  const result = await getAllTokensBalance(publickey);
-  res.send(result);
+  try {
+    const publickey = new PublicKey(_req.query.address as string);
+    const result = await getAllTokensBalance(publickey);
+    res.send(result);
+  } catch (e) {
+    res.send({ code: 403, data: "Invalid address", status: false });
+  }
 });
 
 app.listen(3000, () => {
