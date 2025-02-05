@@ -1,10 +1,10 @@
 import { PublicKey } from "@solana/web3.js";
-import { getMint } from "@solana/spl-token";
 import { VersionedTransaction, SendOptions } from "@solana/web3.js";
 import { Wallet } from "@project-serum/anchor";
 import { connection } from "./init.js";
 import { Keypair } from "@solana/web3.js";
 import fetch from "node-fetch";
+import { Metaplex } from "@metaplex-foundation/js";
 
 type CreateOrder = {
   inputMint: string;
@@ -544,4 +544,50 @@ export async function jupiterGetOrders(
   return { code: res.code, status: res.status, data: `${res.data}` };
 }
 
-//limit at 1000%
+export async function getAllTokensBalance(publicKey: PublicKey) {
+  try {
+    const solBalance = await getSolBalance(publicKey);
+    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+      publicKey,
+      {
+        programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+      }
+    );
+    const formatedData = await Promise.all(
+      tokenAccounts.value.map(async (item) => {
+        const mint = new PublicKey(item.account.data.parsed.info.mint);
+        const symbol = await getTokenSymbol(mint.toString());
+        return {
+          symbol: symbol || mint,
+          balance: parseFloat(
+            item.account.data.parsed.info.tokenAmount.uiAmountString
+          ),
+        };
+      })
+    );
+    formatedData.push({
+      symbol: "SOL",
+      balance: solBalance.balance || 0,
+    });
+    return { code: 200, status: true, data: formatedData };
+  } catch (e) {
+    return { code: 401, status: true, data: "Error when fetching tokens" };
+  }
+}
+
+async function getTokenSymbol(tokenMintAddress: string) {
+  const metaplex = Metaplex.make(connection);
+  try {
+    const mintPublicKey = new PublicKey(tokenMintAddress);
+
+    // Fetch token metadata
+    const metadata = await metaplex
+      .nfts()
+      .findByMint({ mintAddress: mintPublicKey });
+
+    return metadata.symbol; // Token Symbol
+  } catch (error) {
+    console.error("Error fetching token symbol:", error);
+    return null;
+  }
+}

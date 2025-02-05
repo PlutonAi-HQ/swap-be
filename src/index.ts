@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { PublicKey } from "@solana/web3.js";
 import { init } from "./util/init.js";
 import {
+  getAllTokensBalance,
   getBalance,
   getCurrentOutputAmount,
   getPrice,
@@ -151,6 +152,12 @@ app.get("/rateLimitCheck", async (_req, res) => {
     params.outputAmount
   );
   res.send(data);
+});
+
+app.get("/allTokens", async (_req, res) => {
+  const publickey = new PublicKey(_req.query.address as string);
+  const result = await getAllTokensBalance(publickey);
+  res.send(result);
 });
 
 app.listen(3000, () => {
