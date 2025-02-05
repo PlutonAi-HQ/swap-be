@@ -559,6 +559,7 @@ export async function getAllTokensBalance(publicKey: PublicKey) {
         const symbol = await getTokenSymbol(mint);
         return {
           symbol: symbol || mint,
+          address: mint.toBase58(),
           balance: parseFloat(
             item.account.data.parsed.info.tokenAmount.uiAmountString
           ),
@@ -567,6 +568,7 @@ export async function getAllTokensBalance(publicKey: PublicKey) {
     );
     formatedData.push({
       symbol: "SOL",
+      address: "So11111111111111111111111111111111111111112",
       balance: solBalance.balance ? solBalance.balance / 10 ** 9 : 0,
     });
     return { code: 200, status: true, data: formatedData };
