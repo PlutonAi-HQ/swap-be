@@ -20,6 +20,12 @@ export type ILimitRateCheck = {
   outputAmount: number; // amount of output token
 };
 
+export type IToken = {
+  symbol: string;
+  address: string;
+  decimals: number;
+};
+
 //   new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), // USDC
 //   0.01, // 100 USDC
 //   new PublicKey("So11111111111111111111111111111111111111112"), // SOL

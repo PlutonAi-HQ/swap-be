@@ -9,6 +9,7 @@ import {
   getCurrentOutputAmount,
   getPrice,
   getSolBalance,
+  getTokensByName,
   jupiterCancelOrders,
   jupiterGetOrders,
   jupiterLimitOrder,
@@ -161,6 +162,15 @@ app.get("/allTokens", async (_req, res) => {
     res.send(result);
   } catch (e) {
     res.send({ code: 403, data: "Invalid address", status: false });
+  }
+});
+
+app.get("/tokensByName", async (_req, res) => {
+  try {
+    const result = await getTokensByName(_req.query.name as string);
+    res.send(result);
+  } catch (e) {
+    res.send({ code: 403, data: "Invalid name", status: false });
   }
 });
 

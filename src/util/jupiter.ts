@@ -5,6 +5,7 @@ import { connection } from "./init.js";
 import { Keypair } from "@solana/web3.js";
 import fetch from "node-fetch";
 import { Metaplex } from "@metaplex-foundation/js";
+import { IToken } from "../type.js";
 
 type CreateOrder = {
   inputMint: string;
@@ -591,3 +592,44 @@ async function getTokenSymbol(mintPublicKey: PublicKey) {
     return null;
   }
 }
+
+export async function getTokensByName(name: string) {
+  if (name == "SOL")
+    return {
+      code: 200,
+      status: true,
+      data: [
+        {
+          symbol: "SOL",
+          address: "So11111111111111111111111111111111111111112",
+          decimals: 9,
+        },
+      ],
+    };
+  try {
+    const data = await fetch("https://api-v3.raydium.io/mint/list").then(
+      (res) => res.json()
+    );
+    const minlist: any[] = data.data.mintList;
+    if (minlist) {
+      let tokens: IToken[] = [];
+      minlist.forEach((item) => {
+        if (item.symbol == name) {
+          tokens.push({
+            symbol: item.symbol,
+            address: item.address,
+            decimals: item.decimals,
+          });
+        }
+      });
+      if (tokens.length == 0) {
+        return { code: 401, status: false, data: "Token not found" };
+      }
+      return { code: 200, status: true, data: tokens };
+    }
+    return { code: 401, status: false, data: "Token not found" };
+  } catch (e) {
+    return { code: 401, status: false, data: "Fail to fetch token" };
+  }
+}
+//note: some token is not get from the api, so we need to add it manually
