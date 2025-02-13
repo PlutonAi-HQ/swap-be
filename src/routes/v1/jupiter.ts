@@ -1,0 +1,37 @@
+import { Router } from "express";
+import { jupiterControllers } from "../../controllers/jupiter.js";
+const router: Router = Router();
+
+router.post("/jupiterLimitOrder", async (_req, res, next) => {
+  jupiterControllers.limitOrder(_req, res, next);
+});
+
+router.post("/jupiterSwap", async (_req, res, next) => {
+  jupiterControllers.swap(_req, res, next);
+});
+
+router.post("/cancelOrders", async (_req, res, next) => {
+  jupiterControllers.cancelOrders(_req, res, next);
+});
+
+router.post("/getOrders", async (_req, res, next) => {
+  jupiterControllers.getOrders(_req, res, next);
+});
+
+router.post("/balance", async (_req, res, next) => {
+  jupiterControllers.balance(_req, res, next);
+});
+
+router.get("/rateLimitCheck", async (_req, res, next) => {
+  jupiterControllers.rateLimitCheck(_req, res, next);
+});
+
+router.get("/allTokens", async (_req, res, next) => {
+  jupiterControllers.allTokens(_req, res, next);
+});
+
+router.get("/tokensByName", async (_req, res, next) => {
+  jupiterControllers.tokenByName(_req, res, next);
+});
+
+export default router;

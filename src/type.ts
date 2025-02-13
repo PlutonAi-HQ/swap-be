@@ -26,6 +26,40 @@ export type IToken = {
   decimals: number;
 };
 
+export type CreateOrder = {
+  inputMint: string;
+  outputMint: string;
+  maker: string;
+  payer: string;
+  params: {
+    makingAmount: string;
+    takingAmount: string;
+    expiredAt?: string;
+    feeBps?: string;
+  };
+  computeUnitPrice: string | "auto";
+  referral?: string;
+  inputTokenProgram?: string;
+  outputTokenProgram?: string;
+  wrapAndUnwrapSol?: boolean;
+};
+
+export type GetLimitOrders = {
+  maker: string;
+  computeUnitPrice: "auto";
+};
+
+export type CancelOrders = {
+  maker: string;
+
+  // "auto" sets the priority fee based on network congestion
+  // and it will be capped at 500,000
+  computeUnitPrice: string | "auto";
+
+  // Specific order account public keys to cancel/close
+  orders?: string[] | undefined;
+};
+
 //   new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), // USDC
 //   0.01, // 100 USDC
 //   new PublicKey("So11111111111111111111111111111111111111112"), // SOL
