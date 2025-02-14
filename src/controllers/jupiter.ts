@@ -132,7 +132,24 @@ const tokenByName: RequestHandler = async (_req, res) => {
   }
 };
 
+const searchToken: RequestHandler = async (_req, res) => {
+  const result = await jupiterServices.searchCoin(_req.query.name as string);
+  res.send(result);
+};
+
+const searchTokenPair: RequestHandler = async (_req, res) => {
+  const result = await jupiterServices.searchTokenPair(
+    _req.query.tokenNameA as string,
+    _req.query.tokenNameB as string,
+    parseFloat(_req.query.amount as string),
+    parseFloat(_req.query.slippage as string)
+  );
+  res.send(result);
+};
+
 const jupiterControllers = {
+  searchToken,
+  searchTokenPair,
   limitOrder,
   swap,
   cancelOrders,

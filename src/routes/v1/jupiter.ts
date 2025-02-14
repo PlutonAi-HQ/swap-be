@@ -34,4 +34,14 @@ router.get("/tokensByName", async (_req, res, next) => {
   jupiterControllers.tokenByName(_req, res, next);
 });
 
+router.get("/searchToken", async (_req, res, next) => {
+  jupiterControllers.searchToken(_req, res, next);
+});
+
+router.get("/searchTokenPair", async (_req, res, next) => {
+  jupiterControllers.searchTokenPair(_req, res, next);
+});
+
 export default router;
+
+// https://token.jup.ag/all

@@ -5,8 +5,15 @@ import { connection } from "../util/init.js";
 import { Keypair } from "@solana/web3.js";
 import fetch from "node-fetch";
 import { Metaplex } from "@metaplex-foundation/js";
-import { IToken, CreateOrder, CancelOrders, GetLimitOrders } from "../type.js";
+import {
+  IToken,
+  CreateOrder,
+  CancelOrders,
+  GetLimitOrders,
+  TokenDetails,
+} from "../type.js";
 import { sendAndConfirmTransaction } from "@solana/web3.js";
+import { jup } from "../util/api.js";
 
 interface Response {
   code: number;
@@ -248,6 +255,7 @@ class JupiterServices {
           outputMint.toBase58() == "So11111111111111111111111111111111111111112"
             ? await this.getSolBalance(wallet.publicKey)
             : await this.getBalance(wallet.publicKey, outputMint);
+        console.log(new_balance.balance, "-", outputBalance.balance);
         if (
           outputBalance.balance &&
           new_balance.balance &&
@@ -635,6 +643,55 @@ class JupiterServices {
           return { code: 401, status: false, data: "Token not found" };
         }
         return { code: 200, status: true, data: tokens };
+      }
+      return { code: 401, status: false, data: "Token not found" };
+    } catch (e) {
+      return { code: 401, status: false, data: "Fail to fetch token" };
+    }
+  }
+  async fetchTokenList() {
+    const data = await fetch(`${jup}/tokens?tags=lst,community`).then((res) =>
+      res.json()
+    );
+    return data;
+  }
+
+  async searchCoin(coinName: string) {
+    const data = await this.fetchTokenList();
+    // @ts-ignore
+    const filterTokenList = data.filter((token) => token.symbol == coinName);
+    return filterTokenList;
+  }
+
+  async searchTokenPair(
+    tokenNameA: string,
+    tokenNameB: string,
+    amount: number,
+    slipage: number
+  ) {
+    try {
+      const data = await this.fetchTokenList();
+      if (data) {
+        const tokenA = data.find(
+          (token: TokenDetails) => token.symbol == tokenNameA.toUpperCase()
+        );
+        // @ts-ignore
+        const tokenB = data.find(
+          (token: TokenDetails) => token.symbol == tokenNameB.toUpperCase()
+        );
+        if (tokenA && tokenB) {
+          const price = await fetch(`
+            https://transaction-v1.raydium.io/compute/swap-base-in?inputMint=${
+              tokenA.address
+            }&outputMint=${tokenB.address}&amount=${
+            amount * 10 ** tokenA.decimals
+          }&slippageBps=${slipage * 10}&txVersion=V0`).then((res) =>
+            res.json()
+          );
+
+          return price;
+        }
+        return { code: 401, status: false, data: "Token not found" };
       }
       return { code: 401, status: false, data: "Token not found" };
     } catch (e) {
