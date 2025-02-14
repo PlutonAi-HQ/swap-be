@@ -13,7 +13,7 @@ import {
   TokenDetails,
 } from "../type.js";
 import { sendAndConfirmTransaction } from "@solana/web3.js";
-import { jup } from "../util/api.js";
+import { dexscreener, jup } from "../util/api.js";
 
 interface Response {
   code: number;
@@ -660,7 +660,7 @@ class JupiterServices {
     const data = await this.fetchTokenList();
     // @ts-ignore
     const filterTokenList = data.filter((token) => token.symbol == coinName);
-    return filterTokenList;
+    return { code: 200, status: true, data: filterTokenList };
   }
 
   async searchTokenPair(
@@ -689,13 +689,30 @@ class JupiterServices {
             res.json()
           );
 
-          return price;
+          return { code: 200, status: true, data: price };
         }
         return { code: 401, status: false, data: "Token not found" };
       }
       return { code: 401, status: false, data: "Token not found" };
     } catch (e) {
       return { code: 401, status: false, data: "Fail to fetch token" };
+    }
+  }
+
+  async getPoolInfo(tokenAName: string, tokenBName: string) {
+    try {
+      const pool = await this.searchTokenPair(tokenAName, tokenBName, 1, 0.5);
+      if (!pool.status) {
+        return { code: 401, status: false, data: "Fail to fetch pool" };
+      }
+      const data = await fetch(
+        `${dexscreener}/latest/dex/pairs/solana/${pool.data.data.routePlan[0].poolId}`
+      ).then((res) => res.json());
+      return data;
+      // da co pool id, fetch thong tin pool tu dexscreener
+    } catch (e) {
+      // @ts-ignore
+      return { code: 401, status: false, data: e.message };
     }
   }
 }

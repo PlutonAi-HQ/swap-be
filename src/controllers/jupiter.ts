@@ -147,9 +147,18 @@ const searchTokenPair: RequestHandler = async (_req, res) => {
   res.send(result);
 };
 
+const getPoolInfo: RequestHandler = async (_req, res) => {
+  const rsult = await jupiterServices.getPoolInfo(
+    _req.query.tokenAName as string,
+    _req.query.tokenBName as string
+  );
+  res.send(rsult);
+};
+
 const jupiterControllers = {
   searchToken,
   searchTokenPair,
+  getPoolInfo,
   limitOrder,
   swap,
   cancelOrders,

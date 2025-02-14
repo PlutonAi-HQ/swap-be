@@ -42,6 +42,10 @@ router.get("/searchTokenPair", async (_req, res, next) => {
   jupiterControllers.searchTokenPair(_req, res, next);
 });
 
+router.get("/getPoolInfo", async (_req, res, next) => {
+  jupiterControllers.getPoolInfo(_req, res, next);
+});
+
 export default router;
 
 // https://token.jup.ag/all
