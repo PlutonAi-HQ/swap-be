@@ -19,7 +19,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
 
 
 
-## GET /allTokens
+## GET /api/v1/allTokens
 - Description: Get all balance of tokens by giving wallet address.
 - Request Params:
   - address (string): user wallet address,
@@ -62,7 +62,260 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
     }
     ```
 
-## POST /jupiterSwap
+## GET /api/v1/searchToken
+- Description: Get token detail by giving token name.
+- Request Params:
+  - name (string): token symbol,
+- Ex: get pools info to swap 1 trump to sol
+  ```
+    http://localhost:3000/api/v1/searchTokenPair?tokenNameA=TRUMP&tokenNameB=sol&amount=1&slippage=5
+  ```
+- Sample response:
+  ```json
+  
+
+  ```
+
+## GET /api/v1/searchTokenPair
+- Description: Get the compute result of swap token. The result will contain: amoutn to be swap, pool ids by giving 2 token name.
+- Request Params:
+  - tokenNameA (string): token A symbol,
+  - tokenNameB (string): token B symbol,
+  - amount (number): input amount to swap
+  - slippage (number): slippage (%)
+  
+- Ex: get token info of TRUMP 
+  ```
+    http://localhost:3000/api/v1/searchToken?name=TRUMP
+  ```
+- Sample response:
+  ```json
+  {
+  "code": 200,
+  "status": true,
+  "data": {
+    "id": "e6b88f9b-7831-462b-9833-f821c266d15f",
+    "success": true,
+    "version": "V1",
+    "data": {
+      "swapType": "BaseIn",
+      "inputMint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+      "inputAmount": "1000000",
+      "outputMint": "So11111111111111111111111111111111111111112",
+      "outputAmount": "89213478",
+      "otherAmountThreshold": "88767410",
+      "slippageBps": 50,
+      "priceImpactPct": 0.17,
+      "referrerAmount": "0",
+      "routePlan": [
+        {
+          "poolId": "7XzVsjqTebULfkUofTDH5gDdZDmxacPmPuTfHa1n9kuh",
+          "inputMint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+          "outputMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "feeMint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+          "feeRate": 25,
+          "feeAmount": "2500",
+          "remainingAccounts": [
+            "5cR2hc2DtagoxdE3JNSGuWvKasgQMeMusR1DpAMCNncT",
+            "4k5iDaMAG8WQ9LVSy5odQrbheioK4E4VRD9N6vvdy9rj",
+            "3AYvNUL8b3sdTFsij4NchTszo8KzUGCLiMfWfZSDGYuj"
+          ],
+          "lastPoolPriceX64": "77347680398783933840"
+        },
+        {
+          "poolId": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
+          "inputMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "outputMint": "So11111111111111111111111111111111111111112",
+          "feeMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "feeRate": 1,
+          "feeAmount": "1756",
+          "remainingAccounts": [
+            "FJP5BiS8KKWZDuaWX9bQkzjnuYqEiNdhgcbR6vs19rxG",
+            "R8QQiVW31JSP19uCu35jMB4oabxeugXnpXCHKhitnt6",
+            "7wjf5SENgnH8VJWDLK2zzN7aDRYsCnvJ6i3eYJpRYd8V"
+          ],
+          "lastPoolPriceX64": "8182035007705040043"
+        }
+      ]
+    }
+  }
+  }
+
+  ```
+
+## GET /api/v1/getPoolInfo
+- Description: Get the pool info by giving 2 token name.
+- Request Params:
+  - tokenAName (string): token symbol,
+  - tokenBName (string): token symbol,
+- Ex: get token info of TRUMP 
+  ```
+    http://localhost:3000/api/v1/getPoolInfo?tokenAName=TRUMP&tokenBName=sol
+  ```
+- Sample response:
+  ```json
+  {
+  "schemaVersion": "1.0.0",
+  "pairs": [
+    {
+      "chainId": "solana",
+      "dexId": "raydium",
+      "url": "https://dexscreener.com/solana/hkujrp5tyqlbeudjkwjgnhs2957qkjr2iwhjkttma1xs",
+      "pairAddress": "HKuJrP5tYQLbEUdjKwjgnHs2957QKjR2iWhJKTtMa1xs",
+      "labels": [
+        "CPMM"
+      ],
+      "baseToken": {
+        "address": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+        "name": "OFFICIAL TRUMP",
+        "symbol": "TRUMP"
+      },
+      "quoteToken": {
+        "address": "So11111111111111111111111111111111111111112",
+        "name": "Wrapped SOL",
+        "symbol": "SOL"
+      },
+      "priceNative": "0.08987",
+      "priceUsd": "17.62",
+      "txns": {
+        "m5": {
+          "buys": 31,
+          "sells": 11
+        },
+        "h1": {
+          "buys": 275,
+          "sells": 114
+        },
+        "h6": {
+          "buys": 526,
+          "sells": 218
+        },
+        "h24": {
+          "buys": 1790,
+          "sells": 1567
+        }
+      },
+      "volume": {
+        "h24": 1526296.52,
+        "h6": 307089.58,
+        "h1": 191939.78,
+        "m5": 23910.52
+      },
+      "priceChange": {
+        "m5": 0.76,
+        "h1": 5.38,
+        "h6": 9.73,
+        "h24": 1.44
+      },
+      "liquidity": {
+        "usd": 7430144.86,
+        "base": 210800,
+        "quote": 18944
+      },
+      "fdv": 17623655879,
+      "marketCap": 3524731870,
+      "pairCreatedAt": 1737166730000,
+      "info": {
+        "imageUrl": "https://dd.dexscreener.com/ds-data/tokens/solana/6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN.png?key=f02e9e",
+        "header": "https://dd.dexscreener.com/ds-data/tokens/solana/6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN/header.png?key=f02e9e",
+        "openGraph": "https://cdn.dexscreener.com/token-images/og/solana/6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN?timestamp=1739516700000",
+        "websites": [
+          {
+            "label": "Website",
+            "url": "https://x.com/realDonaldTrump/status/1880446012168249386"
+          }
+        ],
+        "socials": [
+          {
+            "type": "twitter",
+            "url": "https://x.com/GetTrumpMemes"
+          }
+        ]
+      }
+    }
+  ],
+  "pair": {
+    "chainId": "solana",
+    "dexId": "raydium",
+    "url": "https://dexscreener.com/solana/hkujrp5tyqlbeudjkwjgnhs2957qkjr2iwhjkttma1xs",
+    "pairAddress": "HKuJrP5tYQLbEUdjKwjgnHs2957QKjR2iWhJKTtMa1xs",
+    "labels": [
+      "CPMM"
+    ],
+    "baseToken": {
+      "address": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+      "name": "OFFICIAL TRUMP",
+      "symbol": "TRUMP"
+    },
+    "quoteToken": {
+      "address": "So11111111111111111111111111111111111111112",
+      "name": "Wrapped SOL",
+      "symbol": "SOL"
+    },
+    "priceNative": "0.08987",
+    "priceUsd": "17.62",
+    "txns": {
+      "m5": {
+        "buys": 31,
+        "sells": 11
+      },
+      "h1": {
+        "buys": 275,
+        "sells": 114
+      },
+      "h6": {
+        "buys": 526,
+        "sells": 218
+      },
+      "h24": {
+        "buys": 1790,
+        "sells": 1567
+      }
+    },
+    "volume": {
+      "h24": 1526296.52,
+      "h6": 307089.58,
+      "h1": 191939.78,
+      "m5": 23910.52
+    },
+    "priceChange": {
+      "m5": 0.76,
+      "h1": 5.38,
+      "h6": 9.73,
+      "h24": 1.44
+    },
+    "liquidity": {
+      "usd": 7430144.86,
+      "base": 210800,
+      "quote": 18944
+    },
+    "fdv": 17623655879,
+    "marketCap": 3524731870,
+    "pairCreatedAt": 1737166730000,
+    "info": {
+      "imageUrl": "https://dd.dexscreener.com/ds-data/tokens/solana/6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN.png?key=f02e9e",
+      "header": "https://dd.dexscreener.com/ds-data/tokens/solana/6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN/header.png?key=f02e9e",
+      "openGraph": "https://cdn.dexscreener.com/token-images/og/solana/6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN?timestamp=1739516700000",
+      "websites": [
+        {
+          "label": "Website",
+          "url": "https://x.com/realDonaldTrump/status/1880446012168249386"
+        }
+      ],
+      "socials": [
+        {
+          "type": "twitter",
+          "url": "https://x.com/GetTrumpMemes"
+        }
+      ]
+    }
+  }
+  }
+
+  ```
+
+
+## POST /api/v1/jupiterSwap
 - Description: Perform a token swap.
 - Body Parameters:
   - privateKey(string): User's private key.
@@ -84,7 +337,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   ![image](https://github.com/user-attachments/assets/41a5787a-68bb-41aa-983f-b575e3ef13fc)
 
 
-## POST /jupiterLimitOrder  value transfer must > $5 ⚠️ Chỗ này lượng sol đổi ra giá usdc phải > $5, usdc input > 5USDC
+## POST /api/v1/jupiterLimitOrder  value transfer must > $5 ⚠️ Chỗ này lượng sol đổi ra giá usdc phải > $5, usdc input > 5USDC
 - Description: Set up a limit order for token swaps.
 - Body Parameters:
   - privateKey(string): User's private key.
@@ -103,7 +356,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   - Code 403: Do not have enough balance.
 
 
-## POST /cancelOrders: 
+## POST /api/v1/cancelOrders: 
 - Description: cancel all the orders
 - Body Parameters:
   - privateKey(string): User's private key.
@@ -111,7 +364,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   - Successfull: {code: 200, status: true, data: ```transaction_id``` }
   - Fail: {code: , status: false, data: "No matching orders found" }
  
-## POST /balance
+## POST /api/v1/balance
 - Description: Get the balance of the given address.
 - Request Body:
   - address: string - Wallet address
