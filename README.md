@@ -1,7 +1,9 @@
 # 🚀Swap API
 
+
 This project using [Jupiter Station](https://station.jup.ag/docs/) to implement Solana network token swapping 
-API:
+
+> API:
 1. GET /rateLimitCheck
 2. GET /api/v1/allTokens
 3. GET /api/v1/searchToken
@@ -85,7 +87,39 @@ API:
 - Sample response:
   ```json
   
-
+  {
+  "code": 200,
+  "status": true,
+  "data": {
+    "id": "4e2747bf-577c-4eca-8ef7-853f3b4e361c",
+    "success": true,
+    "version": "V1",
+    "data": {
+      "swapType": "BaseIn",
+      "inputMint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+      "inputAmount": "1000000",
+      "outputMint": "So11111111111111111111111111111111111111112",
+      "outputAmount": "107020420",
+      "otherAmountThreshold": "106485317",
+      "slippageBps": 50,
+      "priceImpactPct": 0,
+      "referrerAmount": "0",
+      "routePlan": [
+        {
+          "poolId": "HKuJrP5tYQLbEUdjKwjgnHs2957QKjR2iWhJKTtMa1xs",
+          "inputMint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+          "outputMint": "So11111111111111111111111111111111111111112",
+          "feeMint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+          "feeRate": 25,
+          "feeAmount": "2500",
+          "remainingAccounts": [
+            
+          ]
+        }
+      ]
+    }
+  }
+  }
   ```
 
 ## 4. GET /api/v1/searchTokenPair
