@@ -1,8 +1,20 @@
 # 🚀Swap API
 
 This project using [Jupiter Station](https://station.jup.ag/docs/) to implement Solana network token swapping 
+API:
+1. GET /rateLimitCheck
+2. GET /api/v1/allTokens
+3. GET /api/v1/searchToken
+4. GET /api/v1/searchTokenPair
+5. GET /api/v1/getPoolInfo
+6. POST /api/v1/jupiterSwap
+7. POST /api/v1/jupiterLimitOrder
+8. POST /api/v1/cancelOrders
+9. POST /api/v1/balance
 
-## GET /rateLimitCheck
+
+
+## 1. GET /rateLimitCheck
 - Description: Check if user input and output in ***limitOrder*** is not out of limit rate
 - Params:
   - inputMint (string): input token address
@@ -19,7 +31,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
 
 
 
-## GET /api/v1/allTokens
+## 2. GET /api/v1/allTokens
 - Description: Get all balance of tokens by giving wallet address.
 - Request Params:
   - address (string): user wallet address,
@@ -62,7 +74,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
     }
     ```
 
-## GET /api/v1/searchToken
+## 3. GET /api/v1/searchToken
 - Description: Get token detail by giving token name.
 - Request Params:
   - name (string): token symbol,
@@ -76,7 +88,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
 
   ```
 
-## GET /api/v1/searchTokenPair
+## 4. GET /api/v1/searchTokenPair
 - Description: Get the compute result of swap token. The result will contain: amoutn to be swap, pool ids by giving 2 token name.
 - Request Params:
   - tokenNameA (string): token A symbol,
@@ -143,7 +155,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
 
   ```
 
-## GET /api/v1/getPoolInfo
+## 5. GET /api/v1/getPoolInfo
 - Description: Get the pool info by giving 2 token name.
 - Request Params:
   - tokenAName (string): token symbol,
@@ -315,7 +327,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   ```
 
 
-## POST /api/v1/jupiterSwap
+## 6. POST /api/v1/jupiterSwap
 - Description: Perform a token swap.
 - Body Parameters:
   - privateKey(string): User's private key.
@@ -337,7 +349,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   ![image](https://github.com/user-attachments/assets/41a5787a-68bb-41aa-983f-b575e3ef13fc)
 
 
-## POST /api/v1/jupiterLimitOrder  value transfer must > $5 ⚠️ Chỗ này lượng sol đổi ra giá usdc phải > $5, usdc input > 5USDC
+## 7. POST /api/v1/jupiterLimitOrder  value transfer must > $5 ⚠️ Chỗ này lượng sol đổi ra giá usdc phải > $5, usdc input > 5USDC
 - Description: Set up a limit order for token swaps.
 - Body Parameters:
   - privateKey(string): User's private key.
@@ -356,7 +368,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   - Code 403: Do not have enough balance.
 
 
-## POST /api/v1/cancelOrders: 
+## 8. POST /api/v1/cancelOrders: 
 - Description: cancel all the orders
 - Body Parameters:
   - privateKey(string): User's private key.
@@ -364,7 +376,7 @@ This project using [Jupiter Station](https://station.jup.ag/docs/) to implement 
   - Successfull: {code: 200, status: true, data: ```transaction_id``` }
   - Fail: {code: , status: false, data: "No matching orders found" }
  
-## POST /api/v1/balance
+## 9. POST /api/v1/balance
 - Description: Get the balance of the given address.
 - Request Body:
   - address: string - Wallet address
