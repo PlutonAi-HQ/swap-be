@@ -5,7 +5,7 @@ import {
 } from "../dto/raydium/index.js";
 import fetch from "node-fetch";
 const RAYDIUM_URL = "https://api-v3.raydium.io";
-
+const GMGN_URL = "https://gmgn.ai";
 class RaydiumService {
   async getTopPairsByApr(params: IGetPoolByAprRequest) {
     const response = await fetch(
@@ -31,6 +31,21 @@ class RaydiumService {
     });
     return responseData;
   }
+
+
+  async getTrendingTokens(limit: number, period: string) {
+
+    const response = await fetch(`https://gmgn.ai/defi/quotation/v1/rank/sol/swaps/24h?app_lang=en&orderby=swaps&direction=desc&filters[]=renounced&filters[]=frozen`).then((res) => {
+      console.log(res.json())
+      return res.json()
+    }).catch((err) => {
+      console.error(err )
+    });
+    return response;
+  }
+
+  
+
 }
 
 const raydiumServices = new RaydiumService();

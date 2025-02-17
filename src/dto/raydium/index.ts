@@ -19,7 +19,6 @@ export type TokenInfo = {
   symbol: string;
   name: string;
   decimals: number;
-  tags: string[];
   extensions: Record<string, unknown>;
 };
 
@@ -31,7 +30,6 @@ export type PoolInfo = {
   feeApr: number;
   priceMin: number;
   priceMax: number;
-  rewardApr: number[];
 };
 
 export type PoolData = {
@@ -50,6 +48,18 @@ export type PoolData = {
   day: PoolInfo;
   week: PoolInfo;
   month: PoolInfo;
+  info?: {
+    websites:{
+      label: string
+      url: string
+    }[];
+    socials: [
+      {
+        type: string
+        url: string;
+      }
+    ]
+  }
 };
 
 export type PoolDataResponse = {

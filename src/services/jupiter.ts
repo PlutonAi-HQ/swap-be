@@ -14,6 +14,7 @@ import {
 } from "../type.js";
 import { sendAndConfirmTransaction } from "@solana/web3.js";
 import { dexscreener, jup } from "../util/api.js";
+import { PoolData, PoolInfo } from "../dto/raydium/index.js";
 
 interface Response {
   code: number;
@@ -699,16 +700,57 @@ class JupiterServices {
     }
   }
 
-  async getPoolInfo(tokenAName: string, tokenBName: string) {
+  async getPoolInfo(tokenAName: string, tokenBName: string)  {
     try {
       const pool = await this.searchTokenPair(tokenAName, tokenBName, 1, 0.5);
       if (!pool.status) {
         return { code: 401, status: false, data: "Fail to fetch pool" };
       }
       const data = await fetch(
-        `${dexscreener}/latest/dex/pairs/solana/${pool.data.data.routePlan[0].poolId}`
+        `https://api-v3.raydium.io/pools/info/ids?ids=${pool.data.data.routePlan[0].poolId}`
       ).then((res) => res.json());
-      return data;
+      const poolInfo = await this.getPoolInfoByID(pool.data.data.routePlan[0].poolId);
+      const poolInfoData = poolInfo.data.pairs[0];
+      let socialsInfo = {
+        
+      }
+      if(poolInfoData.info) 
+        socialsInfo = {
+          websites: poolInfoData.info.websites,
+          socials: poolInfoData.info.socials
+        };
+        
+      
+      return data.data.map((data:PoolData) => {
+        return {
+          poolId: data.id,
+          price: data.price,
+          mintAmountA: data.mintAmountA,
+          mintAmountB: data.mintAmountB,
+          mintA: data.mintA,
+          mintB: data.mintB,
+          tvl: data.tvl,
+          day: data.day,
+          week: data.week,
+          month: data.month,
+          // @ts-ignore
+          info: socialsInfo
+        }
+      });
+      // da co pool id, fetch thong tin pool tu dexscreener
+    } catch (e) {
+      // @ts-ignore
+      return { code: 401, status: false, data: e.message };
+    }
+  }
+
+  async getPoolInfoByID(poolID: string) {
+    try {
+     
+      const data = await fetch(
+        `${dexscreener}/latest/dex/pairs/solana/${poolID}`
+      ).then((res) => res.json());
+      return {code: 200, data, status: true};
       // da co pool id, fetch thong tin pool tu dexscreener
     } catch (e) {
       // @ts-ignore

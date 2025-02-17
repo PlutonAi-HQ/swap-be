@@ -17,6 +17,17 @@ const getPoolsByApr: RequestHandler = async (req, res) => {
   }
 };
 
+const getTrendingTokens: RequestHandler = async (req, res) => {
+  try {
+    const result = await raydiumServices.getTrendingTokens(parseInt(req.query.limit as string), req.query.period as string);
+    res.send({code: 200, message: "success", data: result});
+}catch (e) {
+  console.log(e); 
+  res.status(500).send("Internal server error");
+  }}
+
 export default {
   getPoolsByApr,
+  getTrendingTokens
 };
+
