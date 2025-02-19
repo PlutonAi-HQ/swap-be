@@ -18,7 +18,7 @@ router.get("/getOrders", async (_req, res, next) => {
   jupiterControllers.getOrders(_req, res, next);
 });
 
-router.post("/balance", async (_req, res, next) => {
+router.get("/balance", async (_req, res, next) => {
   jupiterControllers.balance(_req, res, next);
 });
 

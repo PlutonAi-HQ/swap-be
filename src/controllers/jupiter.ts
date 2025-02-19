@@ -79,15 +79,15 @@ const getOrders: RequestHandler = async (_req, res) => {
 };
 
 const balance: RequestHandler = async (_req, res) => {
-  if (_req.body.tokenAddress == "So11111111111111111111111111111111111111112") {
-    const result = await jupiterServices.getSolBalance(
-      new PublicKey(_req.body.address)
-    );
+  const tokenAddress = _req.query.tokenAddress as string;
+  const address = _req.query.address as string;
+  if (tokenAddress == "So11111111111111111111111111111111111111112") {
+    const result = await jupiterServices.getSolBalance(new PublicKey(address));
     res.send({ balance: (result.balance ? result.balance : 0) / 1000000000 });
   } else {
     const result = await jupiterServices.getBalance(
-      new PublicKey(_req.body.address),
-      new PublicKey(_req.body.tokenAddress),
+      new PublicKey(address),
+      new PublicKey(tokenAddress),
       false
     );
 
