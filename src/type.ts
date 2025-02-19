@@ -3,6 +3,7 @@ export type ISwapReqest = {
   inputMint: string;
   outputMint: string;
   inputAmount: number;
+  slippage: number;
 };
 
 export type ILimitOrder = {

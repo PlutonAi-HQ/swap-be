@@ -49,7 +49,7 @@ const swap: RequestHandler = async (_req, res) => {
           inputToken, // input token address
           body.inputAmount, // amount of input token
           new PublicKey(body.outputMint), // output token address
-          100, // 1% slippage
+          body.slippage * 100, // 1% slippage
           1000000000, // 20000000 lamports priority fee
           wallet, // user waller
           keypair
