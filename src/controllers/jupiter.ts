@@ -74,7 +74,7 @@ const cancelOrders: RequestHandler = async (_req, res) => {
 };
 
 const getOrders: RequestHandler = async (_req, res) => {
-  const result = await jupiterServices.getOrders(_req.body.address);
+  const result = await jupiterServices.getOrders(_req.query.address as string);
   res.send(result);
 };
 
@@ -154,8 +154,6 @@ const getPoolInfo: RequestHandler = async (_req, res) => {
   );
   res.send(rsult);
 };
-
-
 
 const jupiterControllers = {
   searchToken,

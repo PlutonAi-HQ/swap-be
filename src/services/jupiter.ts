@@ -532,33 +532,11 @@ class JupiterServices {
   }
 
   async getOrders(address: string): Promise<GetOrdersResponse> {
-    const getOrdersBody: GetLimitOrders = {
-      maker: address,
-      computeUnitPrice: "auto",
-    };
-    const fetchOpts = {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(getOrdersBody),
-    };
     const res = await fetch(
-      "https://api.jup.ag/limit/v2/cancelOrders",
-      fetchOpts
-    )
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.status == 400) {
-          return { code: 200, status: true, data: [] };
-        }
-        return { code: 200, status: true, data: res.txs };
-      })
-      .catch((err) => {
-        return { code: 401, status: false, data: err };
-      });
-    return { code: res.code, status: res.status, data: `${res.data}` };
+      `https://api.jup.ag/limit/v2/openOrders?wallet=${address}`
+    ).then((res) => res.json());
+    const orders = res.map((order: any) => order.account);
+    return { code: 200, status: true, data: orders };
   }
 
   async getAllTokensBalance(publicKey: PublicKey) {
@@ -700,7 +678,7 @@ class JupiterServices {
     }
   }
 
-  async getPoolInfo(tokenAName: string, tokenBName: string)  {
+  async getPoolInfo(tokenAName: string, tokenBName: string) {
     try {
       const pool = await this.searchTokenPair(tokenAName, tokenBName, 1, 0.5);
       if (!pool.status) {
@@ -709,19 +687,18 @@ class JupiterServices {
       const data = await fetch(
         `https://api-v3.raydium.io/pools/info/ids?ids=${pool.data.data.routePlan[0].poolId}`
       ).then((res) => res.json());
-      const poolInfo = await this.getPoolInfoByID(pool.data.data.routePlan[0].poolId);
+      const poolInfo = await this.getPoolInfoByID(
+        pool.data.data.routePlan[0].poolId
+      );
       const poolInfoData = poolInfo.data.pairs[0];
-      let socialsInfo = {
-        
-      }
-      if(poolInfoData.info) 
+      let socialsInfo = {};
+      if (poolInfoData.info)
         socialsInfo = {
           websites: poolInfoData.info.websites,
-          socials: poolInfoData.info.socials
+          socials: poolInfoData.info.socials,
         };
-        
-      
-      return data.data.map((data:PoolData) => {
+
+      return data.data.map((data: PoolData) => {
         return {
           poolId: data.id,
           price: data.price,
@@ -734,8 +711,8 @@ class JupiterServices {
           week: data.week,
           month: data.month,
           // @ts-ignore
-          info: socialsInfo
-        }
+          info: socialsInfo,
+        };
       });
       // da co pool id, fetch thong tin pool tu dexscreener
     } catch (e) {
@@ -746,11 +723,10 @@ class JupiterServices {
 
   async getPoolInfoByID(poolID: string) {
     try {
-     
       const data = await fetch(
         `${dexscreener}/latest/dex/pairs/solana/${poolID}`
       ).then((res) => res.json());
-      return {code: 200, data, status: true};
+      return { code: 200, data, status: true };
       // da co pool id, fetch thong tin pool tu dexscreener
     } catch (e) {
       // @ts-ignore

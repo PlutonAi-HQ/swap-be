@@ -14,7 +14,7 @@ router.post("/cancelOrders", async (_req, res, next) => {
   jupiterControllers.cancelOrders(_req, res, next);
 });
 
-router.post("/getOrders", async (_req, res, next) => {
+router.get("/getOrders", async (_req, res, next) => {
   jupiterControllers.getOrders(_req, res, next);
 });
 
