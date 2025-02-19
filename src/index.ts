@@ -20,6 +20,6 @@ app.get("/", async (_req, res) => {
 
 app.use("/", router);
 
-app.listen(3000, () => {
+app.listen(3001, () => {
   console.log(`REST API is listening on port: ${3000}.`);
 });

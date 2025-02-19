@@ -668,7 +668,20 @@ class JupiterServices {
             res.json()
           );
 
-          return { code: 200, status: true, data: price };
+          return {
+            code: 200,
+            status: true,
+            data: {
+              ...price,
+              data: {
+                ...price.data,
+                outputAmount:
+                  parseFloat(price.data.outputAmount) / 10 ** tokenB.decimals,
+                inputAmount:
+                  parseFloat(price.data.inputAmount) / 10 ** tokenA.decimals,
+              },
+            },
+          };
         }
         return { code: 401, status: false, data: "Token not found" };
       }
