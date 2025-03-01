@@ -46,9 +46,9 @@ router.get("/getPoolInfo", async (_req, res, next) => {
 
 router.post("/dca", jupiterControllers.createDCA);
 
-router.post("/withdraw", jupiterControllers.withdrawDCA);
+router.post("/dca/withdraw", jupiterControllers.withdrawDCA);
 
-router.delete("/closeDCA", jupiterControllers.closeDCA);
+router.post("/dca/close", jupiterControllers.closeDCA);
 
 export default router;
 

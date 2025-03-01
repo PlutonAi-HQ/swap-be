@@ -843,7 +843,7 @@ class JupiterServices {
 
     const txid = await sendAndConfirmTransaction(connection, tx, [user.payer]);
 
-    console.log("Close DCA: ", { txid });
+    return { code: 200, status: true, data: { txid } };
   }
 }
 
