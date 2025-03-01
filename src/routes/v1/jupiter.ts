@@ -26,9 +26,7 @@ router.get("/rateLimitCheck", async (_req, res, next) => {
   jupiterControllers.rateLimitCheck(_req, res, next);
 });
 
-router.get("/allTokens", async (_req, res, next) => {
-  jupiterControllers.allTokens(_req, res, next);
-});
+router.get("/allTokens", jupiterControllers.allTokens);
 
 router.get("/tokensByName", async (_req, res, next) => {
   jupiterControllers.tokenByName(_req, res, next);
@@ -45,6 +43,12 @@ router.get("/searchTokenPair", async (_req, res, next) => {
 router.get("/getPoolInfo", async (_req, res, next) => {
   jupiterControllers.getPoolInfo(_req, res, next);
 });
+
+router.post("/dca", jupiterControllers.createDCA);
+
+router.post("/withdraw", jupiterControllers.withdrawDCA);
+
+router.delete("/closeDCA", jupiterControllers.closeDCA);
 
 export default router;
 

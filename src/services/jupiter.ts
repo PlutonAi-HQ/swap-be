@@ -1,20 +1,27 @@
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { VersionedTransaction, SendOptions } from "@solana/web3.js";
 import { Wallet } from "@project-serum/anchor";
-import { connection } from "../util/init.js";
+import { connection, dca, init } from "../util/init.js";
 import { Keypair } from "@solana/web3.js";
 import fetch from "node-fetch";
 import { Metaplex } from "@metaplex-foundation/js";
-import {
-  IToken,
-  CreateOrder,
-  CancelOrders,
-  GetLimitOrders,
-  TokenDetails,
-} from "../type.js";
-import { sendAndConfirmTransaction } from "@solana/web3.js";
+import { IToken, CreateOrder, CancelOrders, TokenDetails } from "../type.js";
 import { dexscreener, jup } from "../util/api.js";
-import { PoolData, PoolInfo } from "../dto/raydium/index.js";
+import { PoolData } from "../dto/raydium/index.js";
+import {
+  CloseDCAParams,
+  DCA,
+  Network,
+  type CreateDCAParamsV2,
+  type DepositParams,
+  type WithdrawParams,
+} from "@jup-ag/dca-sdk";
+import { sendAndConfirmTransaction } from "@solana/web3.js";
+import {
+  ICancleDCA,
+  ICreateDCARequest,
+  IWidrawDCARequest,
+} from "../dto/jupiter.js";
 
 interface Response {
   code: number;
@@ -745,6 +752,98 @@ class JupiterServices {
       // @ts-ignore
       return { code: 401, status: false, data: e.message };
     }
+  }
+
+  async createDCA(data: ICreateDCARequest, user: Wallet) {
+    const {
+      inputMint,
+      outputMint,
+      inputAmount,
+      timeHoursCircle,
+      amountPerCircle,
+    } = data;
+    const inputTokenResponse = await this.searchCoin(inputMint);
+    const outputTokenResponse = await this.searchCoin(outputMint);
+    if (!inputTokenResponse || !outputTokenResponse) {
+      return { code: 401, status: false, data: "Token not found" };
+    }
+
+    // Get the token address and decimals
+    const inputTokenAddress = inputTokenResponse.data[0].address;
+    const outputTokenAddress = outputTokenResponse.data[0].address;
+    const inputTokenDecimals = inputTokenResponse.data[0].decimals;
+    const outputTokenDecimals = outputTokenResponse.data[0].decimals;
+    // scale the amount to the correct decimals
+    const scaledInputAmount = inputAmount * 10 ** inputTokenDecimals;
+    const scaleOutAmountPerCircle = amountPerCircle * 10 ** inputTokenDecimals;
+
+    const params: CreateDCAParamsV2 = {
+      payer: user.publicKey, // could have a different account pay for the tx (make sure this account is also a signer when sending the tx)
+      user: user.publicKey,
+      inAmount: BigInt(scaledInputAmount), // buy a total of 5 USDC over 5 days
+      inAmountPerCycle: BigInt(scaleOutAmountPerCircle), // buy using 1 USDC each day
+      cycleSecondsApart: BigInt(parseInt(`${60 * 60 * timeHoursCircle}`)), // 1 day between each order -> 60 * 60 * hours
+      inputMint: new PublicKey(inputTokenAddress), // sell
+      outputMint: new PublicKey(outputTokenAddress), // buy
+      minOutAmountPerCycle: null, // effectively allows for a max price. refer to Integration doc
+      maxOutAmountPerCycle: null, // effectively allows for a min price. refer to Integration doc
+      startAt: null, // unix timestamp in seconds
+      userInTokenAccount: undefined, // optional: if the inputMint token is not in an Associated Token Account but some other token account, pass in the PublicKey of the token account, otherwise, leave it undefined
+    };
+
+    const { tx, dcaPubKey } = await dca.createDcaV2(params);
+    const txid = await sendAndConfirmTransaction(connection, tx, [user.payer]);
+
+    console.log("Create DCA: ", { txid });
+
+    return { code: 200, status: true, data: { txid, dcaPubKey } };
+  }
+
+  // this is for withdrawing from program ATA
+  async withdraw(data: IWidrawDCARequest) {
+    const { privateKey, dcaPublickey, amount, inputMint } = data;
+    const initialWallet = init(privateKey);
+    if (!initialWallet)
+      return { code: 401, status: false, data: "Invalid private key" };
+    const user = initialWallet.wallet;
+    const tokenInfo = await this.searchCoin(inputMint);
+    if (!tokenInfo)
+      return { code: 401, status: false, data: "Token not found" };
+    const tokenAddress = tokenInfo.data[0].address;
+    const tokenDecimals = tokenInfo.data[0].decimals;
+    const scaledAmount = amount * 10 ** tokenDecimals;
+    console.log(dcaPublickey, tokenAddress, scaledAmount);
+    // it's possible to withdraw in-tokens only or out-tokens only or both in and out tokens together. See WithdrawParams for more details
+    const params: WithdrawParams = {
+      user: user.publicKey,
+      dca: dcaPublickey,
+      inputMint: new PublicKey(tokenAddress),
+      withdrawInAmount: BigInt(scaledAmount),
+    };
+
+    const { tx } = await dca.withdraw(params);
+
+    const txid = await sendAndConfirmTransaction(connection, tx, [user.payer]);
+
+    console.log("Withdraw: ", { txid });
+  }
+
+  async closeDCA(data: ICancleDCA) {
+    const { privateKey, dcaPublickey } = data;
+    const initialWallet = init(privateKey);
+    if (!initialWallet)
+      return { code: 401, status: false, data: "Invalid private key" };
+    const user = initialWallet.wallet;
+    const params: CloseDCAParams = {
+      user: user.publicKey,
+      dca: dcaPublickey,
+    };
+
+    const { tx } = await dca.closeDCA(params);
+
+    const txid = await sendAndConfirmTransaction(connection, tx, [user.payer]);
+
+    console.log("Close DCA: ", { txid });
   }
 }
 

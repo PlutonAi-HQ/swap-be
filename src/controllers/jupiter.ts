@@ -3,12 +3,18 @@ import { ILimitOrder, ILimitRateCheck, ISwapReqest } from "../type.js";
 import { init } from "../util/init.js";
 import { PublicKey } from "@solana/web3.js";
 import { jupiterServices } from "../services/index.js";
+import { ICreateDCARequest, IWidrawDCARequest } from "../dto/jupiter.js";
 
 const limitOrder: RequestHandler = async (_req, res) => {
   try {
     // convert body to ILimitOrder
     const body: ILimitOrder = _req.body;
-    const { wallet } = init(body.privateKey);
+    const initialWallet = init(body.privateKey);
+    if (!initialWallet) {
+      res.send({ code: 403, data: "Invalid private key", status: false });
+      return;
+    }
+    const { wallet } = initialWallet;
 
     try {
       const inputToken = new PublicKey(body.inputMint);
@@ -39,7 +45,12 @@ const swap: RequestHandler = async (_req, res) => {
     // convert body to ISwapReqest
     const body: ISwapReqest = _req.body;
     // init wallet and keypair
-    const { wallet, keypair } = init(body.privateKey);
+    const initialWallet = init(body.privateKey);
+    if (!initialWallet) {
+      res.send({ code: 403, data: "Invalid private key", status: false });
+      return;
+    }
+    const { wallet, keypair } = initialWallet;
     console.log("jupiter swapp");
     try {
       const inputToken = new PublicKey(body.inputMint);
@@ -68,7 +79,12 @@ const swap: RequestHandler = async (_req, res) => {
 };
 
 const cancelOrders: RequestHandler = async (_req, res) => {
-  const { wallet } = init(_req.body.privateKey);
+  const initialWallet = init(_req.body.privateKey);
+  if (!initialWallet) {
+    res.send({ code: 403, data: "Invalid private key", status: false });
+    return;
+  }
+  const { wallet } = initialWallet;
   const result = await jupiterServices.cancelOrders(wallet);
   res.send(result);
 };
@@ -155,6 +171,45 @@ const getPoolInfo: RequestHandler = async (_req, res) => {
   res.send(rsult);
 };
 
+const createDCA: RequestHandler = async (_req, res) => {
+  try {
+    const body: ICreateDCARequest = _req.body;
+    const initialWallet = init(body.privateKey);
+    if (!initialWallet) {
+      res.send({ code: 403, data: "Invalid private key", status: false });
+      return;
+    }
+    const user = initialWallet.wallet;
+
+    const result = await jupiterServices.createDCA(body, user);
+    res.send(result);
+  } catch (e) {
+    // @ts-ignore
+    res.send({ code: 403, data: e.message, status: false });
+  }
+};
+const withdrawDCA: RequestHandler = async (_req, res) => {
+  try {
+    const body: IWidrawDCARequest = _req.body;
+    const result = await jupiterServices.withdraw(body);
+    res.send(result);
+  } catch (e) {
+    // @ts-ignore
+    res.send({ code: 403, data: e.message, status: false });
+  }
+};
+
+const closeDCA: RequestHandler = async (_req, res) => {
+  try {
+    const body = _req.body;
+    const result = await jupiterServices.closeDCA(body);
+    res.send(result);
+  } catch (e) {
+    // @ts-ignore
+    res.send({ code: 403, data: e.message, status: false });
+  }
+};
+
 const jupiterControllers = {
   searchToken,
   searchTokenPair,
@@ -167,6 +222,9 @@ const jupiterControllers = {
   rateLimitCheck,
   allTokens,
   tokenByName,
+  createDCA,
+  withdrawDCA,
+  closeDCA,
 };
 
 export { jupiterControllers };
